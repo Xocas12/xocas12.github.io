@@ -13,7 +13,7 @@ import sys
 
 SRC = pathlib.Path(__file__).resolve().parent
 REPO = SRC.parent
-THEMES = ["plain", "ink", "serif", "marker"]
+THEMES = ["plain", "folders", "yearbook", "typewriter"]
 DEFAULT_THEME = "plain"
 
 PAGES = [  # file, nav label, <title>

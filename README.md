@@ -10,7 +10,7 @@ Every push to `main` runs `.github/workflows/pages.yml`, which builds the site a
 | Where | What |
 |---|---|
 | `src/pages/` | page content: `home.html`, `cv.html`, `projects.html`, `other.html` |
-| `src/themes/` | `_common.css` (layout) and one file per style: `plain`, `ink`, `serif`, `marker` |
+| `src/themes/` | `_common.css` (layout) and one file per style: `plain`, `folders`, `yearbook`, `typewriter` |
 | `src/demo_*`, `gsib_demo.json`, `forensics.json` | the two demos on the Other page |
 | `src/activity.*`, `src/commits/` | the commit heatmap (`python src/make_activity.py` after updating the CSVs) |
 | `papers/` | the PDFs linked from the Other page |

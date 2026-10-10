@@ -11,12 +11,10 @@ import re
 import shutil
 import sys
 
-from flags import word
-
 SRC = pathlib.Path(__file__).resolve().parent
 REPO = SRC.parent
-THEMES = ["signal", "plain"]
-DEFAULT_THEME = "signal"
+THEMES = ["quiet", "plain"]
+DEFAULT_THEME = "quiet"
 
 PAGES = [  # file, nav label, <title>
     ("index", None, "Xocas Álvarez"),
@@ -56,7 +54,6 @@ def page(name, title, theme, root, preview):
               rd(SRC / "demo_forensics.js").replace("__FORENSICS_DATA__", rd(SRC / "forensics.json")),
               rd(SRC / "activity.js").replace("__ACTIVITY_DATA__", rd(SRC / "activity.json"))]
         scripts = "".join(f"<script>\n{s}\n</script>\n" for s in js)
-    body = re.sub(r"\{\{FLAGS:([A-Z]+)\}\}", lambda m: word(m.group(1), interactive=True), body)
     body = sections(body.replace("{{ROOT}}", root))
     left = re.findall(r"\{\{[A-Z_]+\}\}", body)
     if left:
@@ -67,8 +64,7 @@ def page(name, title, theme, root, preview):
         for f, label, _ in PAGES if label)
     header = "" if name == "index" else (
         f'<header class="site"><a class="name" href="index.html">Xocas Álvarez</a><nav>{nav}</nav></header>\n'
-        f'<div class="title-row"><h1 class="page-title">{title.split(" · ")[0]}</h1>'
-        f'<div class="flags small" aria-hidden="true">{word(title.split(" · ")[0])}</div></div>\n')
+        f'<h1 class="page-title">{title.split(" · ")[0]}</h1>\n')
     footer = "".join(f'<a href="{href}">{label}</a>' for href, label in CONTACT)
     bar = ""
     if preview:

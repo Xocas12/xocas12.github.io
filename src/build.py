@@ -28,7 +28,7 @@ CONTACT = [
     ("https://github.com/xocas123", "GitHub (older)"),
     ("https://www.linkedin.com/in/xocas-%C3%A1lvarez-21a250225/", "LinkedIn"),
 ]
-DESCRIPTION = "Xocas Álvarez, data and ML engineer in New York."
+DESCRIPTION = "Xocas Álvarez, data and ML engineer in Barcelona."
 
 CUR = ' aria-current="page"'
 rd = lambda p: p.read_text(encoding="utf-8")

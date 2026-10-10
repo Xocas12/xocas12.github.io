@@ -18,11 +18,11 @@ THEMES = ["quiet", "plain"]
 DEFAULT_THEME = "quiet"
 
 PAGES = [  # file, nav label, <title>
-    ("index", None, "Xocas Álvarez"),
-    ("cv", "CV", "CV · Xocas Álvarez"),
-    ("projects", "Projects", "Projects · Xocas Álvarez"),
-    ("writing", "Writing", "Writing · Xocas Álvarez"),
-    ("other", "Other", "Other · Xocas Álvarez"),
+    ("index", None, "Xocas Álvarez Jorge"),
+    ("cv", "CV", "CV · Xocas Álvarez Jorge"),
+    ("projects", "Projects", "Projects · Xocas Álvarez Jorge"),
+    ("writing", "Writing", "Writing · Xocas Álvarez Jorge"),
+    ("other", "Other", "Other · Xocas Álvarez Jorge"),
 ]
 CONTACT = [
     ("mailto:xocas04@gmail.com", "Email"),

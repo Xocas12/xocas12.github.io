@@ -1,0 +1,57 @@
+<style>
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; flex-wrap: wrap; }
+  .seg button {
+    font: 12.5px var(--mono); letter-spacing: .04em; color: var(--muted); background: var(--surface);
+    border: 0; border-right: 1px solid var(--line); padding: 8px 13px; cursor: pointer;
+  }
+  .seg button:last-child { border-right: 0; }
+  .seg button[aria-pressed="true"] { background: var(--surface-2); color: var(--ink); box-shadow: inset 0 -2px 0 var(--accent); }
+  .fz-chart { width: 100%; height: auto; display: block; }
+  .fz-chart .axis text { font-family: var(--mono); font-size: 11px; fill: var(--faint); }
+  .fz-chart .grid { stroke: var(--line); stroke-width: 1; }
+  .fz-chart .bars { fill: color-mix(in oklab, var(--muted) 45%, var(--surface)); }
+  .fz-chart .bars-int { fill: var(--accent); }
+  .fz-chart .exp { fill: none; stroke: var(--teal); stroke-width: 2; stroke-linejoin: round; }
+  .fz-chart .cross { stroke: var(--ink); stroke-width: 1; stroke-dasharray: 3 3; }
+  .fz-chart .peak { font-family: var(--mono); font-size: 11px; fill: var(--ink); paint-order: stroke; stroke: var(--surface); stroke-width: 4px; }
+  .fz-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  @media (max-width: 640px) { .fz-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .pill.flag { background: var(--crit-bg); color: var(--crit); }
+  .fz-sim[hidden] { display: none !important; }
+  .ctl-label { font-family: var(--mono); font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent-ink); }
+</style>
+
+<div class="demo" id="forensics">
+  <h3>Integer-percentage turnout test</h3>
+  <p class="lede">
+    When officials are given a turnout target, reported turnout lands on whole percentages more often than counting
+    noise allows. This is the precinct data from Russia's 2011 Duma and 2018 presidential elections, run through the
+    test as implemented in forensic-elections. Bars are precincts per 0.1-point bin, amber bars are whole
+    percentages, and the line is the count expected under binomial noise.
+  </p>
+  <div class="controls">
+    <div class="ctl">
+      <span class="ctl-label" id="fz-mode-label">Data</span>
+      <div class="seg" role="group" aria-labelledby="fz-mode-label">
+        <button type="button" id="fz-2018" aria-pressed="true">2018 presidential</button>
+        <button type="button" id="fz-2011" aria-pressed="false">2011 Duma</button>
+        <button type="button" id="fz-sim" aria-pressed="false">Simulated</button>
+      </div>
+    </div>
+    <div class="ctl fz-sim" id="fz-sim-ctl" hidden>
+      <label for="fz-cheat">Precincts that report a round target</label>
+      <input type="range" id="fz-cheat" min="0" max="10" step="0.5" value="3">
+      <span class="val" id="fz-cheat-val">3% of 20,000 simulated precincts</span>
+    </div>
+  </div>
+  <svg class="fz-chart" id="fz-chart" viewBox="0 0 900 280" role="img" aria-labelledby="fz-chart-title">
+    <title id="fz-chart-title">Histogram of precinct turnout in 0.1-point bins, with integer-percentage bins highlighted and the expected count under binomial noise as a line.</title>
+  </svg>
+  <div class="fz-stats">
+    <div class="stat"><div class="k">On a whole percent</div><div class="v" id="fz-obs">0</div><div class="s">precincts within 0.05 points</div></div>
+    <div class="stat"><div class="k">Expected by chance</div><div class="v" id="fz-exp">0</div><div class="s" id="fz-sd"></div></div>
+    <div class="stat"><div class="k">Excess</div><div class="v" id="fz-exc">0</div><div class="s" id="fz-exc-s"></div></div>
+    <div class="stat"><div class="k">z-score</div><div class="v" id="fz-z">0</div><div class="s"><span class="pill" id="fz-pill"></span></div></div>
+  </div>
+  <p class="fine-print" id="fz-note"></p>
+</div>

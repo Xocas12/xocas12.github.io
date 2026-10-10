@@ -1,0 +1,201 @@
+  <section id="research">
+    <div class="sec-head">
+      <span class="idx">02</span><h2>Research</h2>
+    </div>
+    <p class="sec-intro">
+      Research code. Each card says whether it has run on real data yet.
+    </p>
+    <div class="cards">
+
+{{RESEARCH_KNOWN}}
+
+{{RESEARCH_NEW}}
+
+      <article class="card">
+        <div class="card-top">
+          <h3>Agenda setting on Truth Social</h3>
+          <span class="chip priv">research assistant · cmu</span>
+        </div>
+        <p>
+          With Dr. Hannah Bailey, on who sets the political agenda online. I turned the lab's novelty, transience
+          and resonance code into a configurable, tested package that runs on CMU's GPU cluster and applied it to
+          1.5 million Truth Social posts. K-means topic clustering, Mann-Whitney and Kolmogorov-Smirnov tests with
+          rank-biserial effect sizes, Gini coefficients and n-gram enrichment showed that 336 accounts (2.3% of
+          active users) produced 31% of all resonance. Much of that was coordinated copy-paste posting that peaked in an
+          August 2024 hashtag campaign.
+        </p>
+        <div class="tags">python · sentence-transformers · k-means · scipy.stats · slurm on cmu's gpu cluster</div>
+      </article>
+
+      <article class="card">
+        <div class="card-top">
+          <h3><a href="https://github.com/xocas123/Arms-Control-and-Ethics-Project" target="_blank" rel="noopener">Arms control: rhetoric vs. behavior</a></h3>
+          <span class="chip open">open source</span>
+        </div>
+        <p>
+          Measures the gap between what states say about arms control and what they do, using 9,046 UN
+          General Debate speeches (1970–2023), 862k voting records and 30k SIPRI arms deals. Sentence
+          embeddings, change-point detection and log-odds analysis, run on a GPU cluster. Three results held
+          up. Treaty-aligned language precedes ratification by about four years (p = 0.008). States outside the
+          Arms Trade Treaty export 2.65× more drone value per deal. Fluency in treaty language correlates with
+          worse compliance (r = 0.215). The boilerplate remover written for the corpus is a separate tool and
+          cuts UN speech text by 17% on average.
+        </p>
+        <div class="card-links">
+          <a href="https://github.com/xocas123/Arms-Control-and-Ethics-Project" target="_blank" rel="noopener">repo ↗</a>
+          <a href="https://github.com/xocas123/UN-Corpus-Cleaning" target="_blank" rel="noopener">un-corpus-cleaning ↗</a>
+        </div>
+        <div class="tags">python · sentence-transformers · lda · pelt change-point · hpc cluster · sipri/ungdc/v-dem</div>
+      </article>
+
+      <article class="card">
+        <div class="card-top">
+          <h3><a href="https://github.com/xocas123/bachelor-thesis" target="_blank" rel="noopener">Humor and theory of mind in LLMs (BSc thesis)</a></h3>
+          <span class="chip open">thesis · leiden</span>
+        </div>
+        <p>
+          Tested whether language models understand humor the way people do, using theory-of-mind tiers as the
+          scale. Thousands of jokes scraped from Reddit's dark-humor communities, combined with a labeled humor
+          dataset. Models first classified whether a joke was funny, then predicted how the community received
+          it, with real vote counts as ground truth. The analysis was both statistical (correlation) and
+          qualitative (where the models failed).
+        </p>
+        <div class="card-links"><a href="https://github.com/xocas123/bachelor-thesis" target="_blank" rel="noopener">repo ↗</a></div>
+        <div class="tags">python · reddit api · deepseek + together ai · theory of mind · quant + qual analysis</div>
+      </article>
+
+    </div>
+  </section>
+
+  <section id="lab">
+    <div class="sec-head">
+      <span class="idx">03</span><h2>Lab</h2>
+    </div>
+    <p class="sec-intro">
+      Two of the methods above, running client-side on public data.
+    </p>
+    <div class="lab">
+{{CONTAGION_HTML}}
+{{FORENSICS_SLOT}}
+    </div>
+  </section>
+
+{{WRITING}}
+  <section id="activity-sec">
+    <div class="sec-head">
+      <span class="idx">05</span><h2>Commit history</h2>
+    </div>
+{{ACTIVITY_HTML}}
+  </section>
+
+  <section id="experience">
+    <div class="sec-head"><span class="idx">06</span><h2>Experience</h2></div>
+    <div class="xp">
+      <div class="xp-when">May 2026 — now</div>
+      <div class="xp-body">
+        <h3>AI Consultant <span>· Samford Group, remote</span></h3>
+        <p>Only technical hire at the holding company. I scope where AI is worth using and build it: the land platform above, its acquisition CRM and outreach, the finance tools, and the Claude connector. About 1,200 merged PRs since May.</p>
+      </div>
+
+      <div class="xp-when">Jan 2026 — now</div>
+      <div class="xp-body">
+        <h3>Research Engineer <span>· Operational Gaming Engine, Carnegie Mellon</span></h3>
+        <p>Built the multi-agent backend and worked on the frontend. I also help the facilitators who run sessions design scenarios around what the models can and can't do.</p>
+      </div>
+
+      <div class="xp-when">Aug 2025 — May 2026</div>
+      <div class="xp-body">
+        <h3>Graduate Research Assistant <span>· Carnegie Mellon</span></h3>
+        <p>With Dr. Hannah Bailey, on how political agendas spread on social media. Rebuilt the lab's novelty, transience and resonance pipeline as a tested package on CMU's GPU cluster and ran it on 1.5 million Truth Social posts. 2.3% of active accounts produced 31% of all resonance, much of it through a coordinated hashtag campaign.</p>
+      </div>
+
+      <div class="xp-when">Feb 2025 — Jun 2025</div>
+      <div class="xp-body">
+        <h3>Project Owner, FAERS Pipeline <span>· LUDev–LACDR, Leiden</span></h3>
+        <p>Led the five-person team that built the FDA adverse-event pipeline, from design to production.</p>
+      </div>
+
+      <div class="xp-when">May 2023 — Jan 2025</div>
+      <div class="xp-body">
+        <h3>Junior Developer <span>· Rubinova, New York</span></h3>
+        <p>Early-stage startup with no engineering team. Built reporting and database systems for university clients on the Google Workspace and Microsoft Graph APIs, gathered requirements with the clients directly, and ran production support. Cut their manual workload by about 60%.</p>
+      </div>
+
+      <div class="xp-when">Dec 2020 — May 2022</div>
+      <div class="xp-body">
+        <h3>Operations &amp; Automation <span>· Tingsvall &amp; McCarthy, Barcelona</span></h3>
+        <p>First production system I built: scheduling, reminders and billing for a small practice with 500+ patient records. No-shows dropped 35%. Also handled client communication in two languages.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="sec-head"><span class="idx">07</span><h2>Skills</h2></div>
+    <dl class="skills">
+      <div class="skill-row"><dt>Languages</dt><dd>Python, SQL, TypeScript/JavaScript, Java, Bash</dd></div>
+      <div class="skill-row"><dt>ML &amp; LLM systems</dt><dd>PyTorch, Hugging Face, scikit-learn, embeddings and clustering; RAG, MCP servers, multi-agent orchestration, evaluation, human-in-the-loop design</dd></div>
+      <div class="skill-row"><dt>Statistics &amp; research</dt><dd>{{SKILLS_STATS}}</dd></div>
+      <div class="skill-row"><dt>Data engineering</dt><dd>ETL/ELT architecture, PostgreSQL/PostGIS, pgvector, geospatial and parcel data, ingestion adapters for messy public sources (BIS, EBA, SEC EDGAR, FEMA, Census)</dd></div>
+      <div class="skill-row"><dt>Infrastructure</dt><dd>Docker, CI/CD, Linux, SLURM/HPC, AWS, GCP, Railway, monitoring, DevSecOps (SAST/DAST)</dd></div>
+      <div class="skill-row"><dt>Application</dt><dd>FastAPI, Next.js/React, Express, Django, Streamlit, dashboarding; requirements scoping with non-technical stakeholders</dd></div>
+      <div class="skill-row"><dt>Certifications</dt><dd>Introduction to Information Technology and Cybersecurity · Cybersecurity Practices for Industrial Control Systems (100W) · B1 German Certificate</dd></div>
+      <div class="skill-row"><dt>Spoken</dt><dd>English, Spanish, Galician (native) · Portuguese, German (intermediate) · Dutch (elementary)</dd></div>
+    </dl>
+  </section>
+
+  <section id="education">
+    <div class="sec-head"><span class="idx">08</span><h2>Education &amp; beyond</h2></div>
+    <div class="edu-grid">
+      <div class="edu">
+        <span class="yr">Aug 2026</span>
+        <h3>Carnegie Mellon University</h3>
+        <div class="deg">MS, Information Technology Strategy · 3.91 GPA</div>
+        <details class="ib">
+          <summary>Coursework</summary>
+          <div class="deg">Applied Machine Learning · AI-Enabled Network Science · DevOps: Engineering, Security, Deployment &amp; Delivery · Information Security Policy</div>
+        </details>
+      </div>
+      <div class="edu">
+        <span class="yr">Jun 2025</span>
+        <h3>Leiden University</h3>
+        <div class="deg">BS, Data Science &amp; Artificial Intelligence · 8.1/10 (Dutch scale)</div>
+        <details class="ib">
+          <summary>Coursework</summary>
+          <div class="deg">Machine Learning · Neural Networks · Reinforcement Learning · Algorithms &amp; Data Structures · Databases · Statistics · Microeconomics</div>
+        </details>
+      </div>
+      <div class="edu">
+        <span class="yr">score: 41/45</span>
+        <h3>International Baccalaureate</h3>
+        <div class="deg">Benjamin Franklin International School, Barcelona</div>
+        <details class="ib">
+          <summary>Higher Level subjects</summary>
+          <div class="deg">HL: Mathematics, Global Politics, Computer Science</div>
+        </details>
+      </div>
+    </div>
+    <div class="extras">
+      <span>Best Delegate · Barcelona Model United Nations</span>
+      <span>1st · International History Bee &amp; Bowl, Europe &amp; Middle East</span>
+      <span>3rd · International History Bee &amp; Bowl, European Varsity</span>
+      <span>2nd · Leiden AI &amp; Robotics Challenge 2023</span>
+      <span>Teaching Assistant, Leiden 2023–24</span>
+      <span>1st · Zuid-Holland BJJ 2024</span>
+      <span>1st · Virginia Judo College Open</span>
+      <span>3rd · Conde Godó Regatta</span>
+    </div>
+  </section>
+
+  <footer>
+    <div class="foot">
+      <div class="cta">Get in touch.</div>
+      <div class="links">
+        <a href="mailto:xocas04@gmail.com">email</a>
+        <a href="https://github.com/Xocas12" target="_blank" rel="noopener">github/Xocas12</a>
+        <a href="https://github.com/xocas123" target="_blank" rel="noopener">github/xocas123</a>
+        <a href="https://www.linkedin.com/in/xocas-%C3%A1lvarez-21a250225/" target="_blank" rel="noopener">linkedin</a>
+      </div>
+      <div class="fine">© 2026 Xocas Álvarez · New York · updated October 2026</div>
+    </div>
+  </footer>
+</div>

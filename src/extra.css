@@ -1,0 +1,4 @@
+  .lab { display: flex; flex-direction: column; gap: 22px; }
+  .card { min-width: 0; }
+  #activity-sec .act { margin-top: -6px; }
+  @media (max-width: 520px) { .card { padding: 20px 18px 18px; } .demo { padding: 20px 16px 18px; } }

@@ -1,0 +1,43 @@
+# Builds index.html from src/ and publishes it, with papers/, to GitHub Pages.
+# Needs Settings -> Pages -> Source set to "GitHub Actions".
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/configure-pages@v5
+      # Only the page and the PDFs ship: src/, the Railway files and the tone screenshots stay out.
+      - name: Build site
+        run: |
+          mkdir _site
+          python3 src/build.py _site/index.html --standalone
+          cp -r papers _site/
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,30 @@
+<style>
+  .act { display: flex; flex-direction: column; gap: 14px; }
+  .act-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px 24px; }
+  .act-head p { margin: 0; color: var(--muted); font-size: 15px; max-width: 62ch; }
+  .act-total { font-family: var(--mono); font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .act-total b { font-family: var(--display); font-weight: 500; font-size: 26px; color: var(--ink); margin-right: 6px; }
+  .act-scroll { overflow-x: auto; padding-bottom: 4px; }
+  .act-grid { display: grid; gap: 3px; align-items: center; min-width: 640px; }
+  .act-row-name { font-family: var(--mono); font-size: 11.5px; color: var(--muted); letter-spacing: .04em; padding-right: 10px; white-space: nowrap; }
+  .act-cell { aspect-ratio: 1 / 1; border-radius: 2px; background: var(--surface-2); min-width: 0; }
+  .act-cell:hover, .act-cell:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+  .act-axis { font-family: var(--mono); font-size: 10.5px; color: var(--faint); white-space: nowrap; overflow: visible; }
+  .act-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+  .act-legend .sw { display: inline-flex; align-items: center; gap: 6px; }
+  .act-legend i { width: 11px; height: 11px; border-radius: 2px; display: inline-block; }
+  .act-table { font-size: 13px; }
+  .act-table summary { cursor: pointer; font-family: var(--mono); font-size: 12px; color: var(--accent-ink); letter-spacing: .04em; }
+  .act-table table { border-collapse: collapse; margin-top: 8px; font-variant-numeric: tabular-nums; }
+  .act-table td, .act-table th { padding: 3px 14px 3px 0; text-align: left; border-bottom: 1px solid var(--line); }
+  .act-table th { font-family: var(--mono); font-size: 11px; color: var(--faint); font-weight: 400; letter-spacing: .08em; text-transform: uppercase; }
+</style>
+<div class="act" id="activity">
+  <div class="act-head">
+    <p>My commits per week, grouped by area. Hover a square for the repos.</p>
+    <div class="act-total" id="act-total"></div>
+  </div>
+  <div class="act-scroll"><div class="act-grid" id="act-grid" role="img" aria-label="Weekly commit heatmap by area of work"></div></div>
+  <div class="act-legend" id="act-legend"></div>
+  <details class="act-table"><summary>Show the numbers</summary><div class="act-scroll"><table id="act-table"></table></div></details>
+</div>

@@ -1,0 +1,28 @@
+/* serif: plain, set like a book. Charter-style text face, navy ink, underlined links, small caps for headings. */
+:root {
+  --bg: #FFFFFF; --surface: #FFFFFF; --surface-2: #F0F2F6; --ink: #14213D; --muted: #3E4A63; --faint: #7D869A; --line: #D5DAE3;
+  --accent: #2448B8; --accent-ink: #2448B8; --teal: #1E7A6B;
+  --chip-open-bg: #E3F0EC; --chip-open-fg: #1E7A6B; --crit: #B3261E; --crit-bg: #F7E1DF;
+  --body: Charter, 'Bitstream Charter', 'Sitka Text', Cambria, Georgia, serif; --display: var(--body); --mono: ui-monospace, Menlo, Consolas, monospace;
+  --measure: 620px; --size: 18px;
+}
+@media (prefers-color-scheme: dark) { :root {
+  color-scheme: dark; --bg: #0F1420; --surface: #0F1420; --surface-2: #1A2131; --ink: #E4E8F0; --muted: #B4BCCC; --faint: #7A8396; --line: #2A3245;
+  --accent: #8EA8FF; --accent-ink: #8EA8FF; --teal: #5FC2B0; --chip-open-bg: #15302B; --chip-open-fg: #5FC2B0; --crit: #F28B82; --crit-bg: #3A1C1A;
+} }
+body { line-height: 1.55; }
+a { text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.intro { padding-top: 12vh; }
+.intro h1 { font-size: 34px; font-weight: 700; }
+.lead { font-size: 21px; color: var(--ink); }
+.page-title { font-size: 34px; font-weight: 700; margin-top: 44px; }
+header.site .name { font-weight: 700; }
+header.site nav a { font-variant: small-caps; letter-spacing: .04em; font-size: 19px; }
+h2 { font-variant: small-caps; letter-spacing: .06em; font-size: 21px; color: var(--muted); margin-bottom: 8px; }
+h3 { font-weight: 700; font-size: 18px; }
+.entries h3 a { color: var(--ink); }
+.entries .meta, .when, dl.kv dt { font-style: italic; color: var(--faint); }
+.entries .meta { font-size: 16px; }
+.go { font-size: 20px; font-variant: small-caps; letter-spacing: .04em; }
+.demo { border-top: 1px solid var(--line); padding: 20px 0 !important; }
+.demo h3 { font-family: var(--body) !important; font-size: 20px !important; font-weight: 700 !important; }

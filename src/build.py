@@ -13,8 +13,8 @@ import sys
 
 SRC = pathlib.Path(__file__).resolve().parent
 REPO = SRC.parent
-THEMES = ["paper", "plain", "mono", "editorial"]
-DEFAULT_THEME = "paper"
+THEMES = ["plain", "ink", "serif", "marker"]
+DEFAULT_THEME = "plain"
 
 PAGES = [  # file, nav label, <title>
     ("index", None, "Xocas Álvarez"),

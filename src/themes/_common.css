@@ -52,3 +52,6 @@ footer a { color: var(--muted); }
 .preview-bar { font: 13px/1.4 system-ui, sans-serif; background: #111; color: #ddd; padding: 8px 20px; display: flex; flex-wrap: wrap; gap: 6px 14px; }
 .preview-bar a { color: #9cf; }
 .preview-bar a[aria-current] { color: #fff; font-weight: 700; text-decoration: none; }
+
+.sel-h { margin-top: 40px; }
+ul.sel { margin: 10px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }

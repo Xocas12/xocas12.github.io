@@ -33,7 +33,7 @@ CONTACT = [
 # Where the site is served. Change this if the repo is renamed or a custom domain is added.
 SITE_URL = "https://xocas12.github.io/"
 # The code from Google Search Console's "HTML tag" verification method (the content="..." value).
-GOOGLE_VERIFICATION = ""
+GOOGLE_VERIFICATION = "9xWymJfgEmocuDqfN_H2qwRycjyuyv-vhc2ef-P83xI"
 DESCRIPTIONS = {
     "index": "Xocas Álvarez is a data and ML engineer in Barcelona working on computational approaches to "
              "social, economic and political questions: elections, finance, conflict and public records.",
@@ -150,6 +150,8 @@ def main():
                                      '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
                                      f"{urls}</urlset>\n", encoding="utf-8")
     shutil.copytree(REPO / "papers", out / "papers", dirs_exist_ok=True)
+    for f in REPO.glob("google*.html"):  # Search Console verification file
+        shutil.copy(f, out / f.name)
     if "--previews" in sys.argv:
         for t in THEMES:
             build(out / "preview" / t, t, root="../../", preview=True)

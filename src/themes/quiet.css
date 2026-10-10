@@ -32,11 +32,11 @@ footer a { color: var(--faint); text-decoration: none; }
 footer a:hover { color: var(--ink); }
 
 /* home */
-.intro { padding-top: 16vh; }
+.intro { padding-top: 12vh; }
 .intro h1 { font-size: 15.5px; font-weight: 500; }
 .role { margin: 0; color: var(--muted); }
 .lead { font-size: 15.5px; margin-top: 28px; max-width: 40em; }
-.now { color: var(--muted); max-width: 40em; }
+.now { color: var(--muted); max-width: 40em; margin-top: 14px; }
 .go { gap: 18px; margin-top: 32px; }
 
 /* page structure */

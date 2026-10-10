@@ -1,36 +1,12 @@
       <article class="card">
         <div class="card-top">
-          <h3><a href="https://github.com/Xocas12/terrafit" target="_blank" rel="noopener">terrafit · land screening for Europe</a></h3>
-          <span class="chip priv">private</span>
-        </div>
-        <p>
-          The US land platform's approach rebuilt for Europe, where each country publishes its data differently.
-          Country data providers and asset-class buy-boxes (solar and storage, logistics, residential) are both
-          plugins, so a new country or asset class doesn't need a fork. Runs on real Spanish cadastral and grid
-          data. Markets run as resumable units and parcels stream through instead of sitting in memory; the first
-          version couldn't finish a large province.
-        </p>
-        <div class="tags">python · postgis · pluggable providers · cnmc / catastro · railway</div>
-      </article>
-      <article class="card">
-        <div class="card-top">
           <h3><a href="https://github.com/Xocas12/hoi4-agent-harness" target="_blank" rel="noopener">hoi4-agent-harness · LLMs playing Hearts of Iron IV</a></h3>
           <span class="chip open">open source</span>
         </div>
         <p>
-          A model-agnostic harness for LLMs playing Hearts of Iron IV (Anthropic, OpenAI-compatible servers,
-          Gemini, or an offline stub). The harness controls the clock. It pauses the game, asks the model, then
-          runs a fixed number of in-game days, which turns a real-time game into a turn-based one. A deterministic
-          reflex layer handles routine moves so the model is only called at actual decision points.
-        </p>
-        <ul>
-          <li>Cost controls: delta briefs instead of full reports, a stable prompt prefix so it bills at cache rates, a bounded journal the agent maintains instead of a growing transcript, 16 coarse actions, and hard caps on calls, tokens and spend.</li>
-          <li>Invalid focus, tech or state ids are rejected with the nearest valid ones. Co-op modes let the model only advise, leave the clock alone, or queue actions until you hand over control.</li>
-        </ul>
-        <p class="note">
-          Early. The README lists which parts are still stubs. Against a stand-in game, 1936 to 1939 takes about 105
-          model calls and 185k input tokens; it hasn't been run against the real game yet. 413 tests.
+          Lets an LLM play Hearts of Iron IV. The harness pauses the game, asks the model for orders, then runs
+          a set number of days, so the real-time game plays in turns. Not yet tested on the full game.
         </p>
         <div class="card-links"><a href="https://github.com/Xocas12/hoi4-agent-harness" target="_blank" rel="noopener">repo ↗</a></div>
-        <div class="tags">python · llm agents · prompt caching · tool use · anthropic / openai / gemini</div>
+        <div class="tags">python · llm agents · tool use</div>
       </article>

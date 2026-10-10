@@ -2,20 +2,11 @@
         <div class="card-top">
           <h3>Statistical forensics</h3>
           <span class="chip open">open source</span>
-          <span class="chip live">results</span>
         </div>
         <p>
-          Tests for manipulation in reported figures: a shared method library plus one repo per domain. Each
-          method is calibrated on cases with a known answer before it's applied anywhere new.
-        </p>
-        <ul>
-          <li><b>forensic-elections</b> reproduces two published falsification signatures on 192,924 Russian precinct protocols. One is an excess of integer turnout and vote-share percentages (z from 2.3 to 12.2). The other is a second turnout mode, found with Silverman's critical-bandwidth test (p = 0.001, 999 bootstrap draws). The integer excess grows with precinct size, which rules out small-precinct arithmetic. <a href="#forensics">Demo below</a>.</li>
-          <li><b>forensics-core</b> has the methods: digit tests, threshold bunching, flow reconciliation with chi-square gross-error tests, and positive-unlabelled learning, with 840 tests. A red-team module generates honest data built to trigger each detector; a 5% OCR glyph-confusion rate makes the last-digit test fire on 54 of 60 clean tables.</li>
-          <li><b>psephos</b> is a CLI auditor for precinct results. Every flag is reported with its innocent explanations, and multiple hypotheses are corrected with Benjamini-Hochberg. It has no first-digit Benford test because that test rejected 100 of 100 honest simulated elections.</li>
-          <li><b>forensic-economy</b> applies the toolkit to SEC enforcement cases, Chinese provincial GDP and Soviet statistics. The data audits are done; the analysis hasn't run.</li>
-        </ul>
-        <p class="note">
-          These tests flag patterns worth a closer look. They don't establish fraud, and each README says so.
+          Statistical tests for manipulated figures, with a shared method library and one repo per domain.
+          forensic-elections reproduces two published fraud signatures on 192,924 Russian precinct records.
+          Flags are leads for a closer look.
         </p>
         <div class="card-links">
           <a href="https://github.com/Xocas12/forensic-elections" target="_blank" rel="noopener">forensic-elections ↗</a>
@@ -23,7 +14,7 @@
           <a href="https://github.com/Xocas12/psephos" target="_blank" rel="noopener">psephos ↗</a>
           <a href="https://github.com/Xocas12/forensic-economy" target="_blank" rel="noopener">forensic-economy ↗</a>
         </div>
-        <div class="tags">python · numpy/scipy · monte carlo nulls · bootstrap · benjamini-hochberg · pu learning · data reconciliation</div>
+        <div class="tags">python · scipy · monte carlo · bootstrap</div>
       </article>
 
       <article class="card">
@@ -32,22 +23,11 @@
           <span class="chip priv">private</span>
         </div>
         <p>
-          A simulation lab on how interbank network structure affects whether one bank failure cascades. Four
-          propagation engines share one interface: Furfine sequential default, Eisenberg-Noe clearing with
-          Rogers-Veraart default costs, differential DebtRank, and fire sales on common sovereign holdings. A
-          result counts only where the engines agree.
+          Simulates whether one bank failure spreads through the interbank network, using four contagion models
+          on a 141-bank network rebuilt from BIS, EBA and regulatory data. No results published yet.
         </p>
-        <ul>
-          <li>Bilateral exposures aren't public, so they're reconstructed three ways from published totals (maximum entropy, minimum density, a fitness ensemble), and each experiment reports how sensitive it is to that choice.</li>
-          <li>Loaders for BIS, IMF, EBA, BCBS and FR Y-15 are tested against fixtures built from real rows, each with a negative control. CET1 for the 22 non-EU G-SIBs is transcribed from the banks' own filings, sourced per row.</li>
-        </ul>
-        <p class="note">
-          Loaders are verified and the first real network build has 141 banks. No experiments have run on it yet.
-          E1, a replication of Espinosa-Vega and Solé (2010) on the country-level network, is coded and tested, but
-          its results aren't published. 460 tests.
-        </p>
-        <div class="card-links"><a href="#contagion">bank-failure demo below</a></div>
-        <div class="tags">python · numpy/scipy · bis cbs · eba · bcbs g-sib · fr y-15 · monte carlo · student-t copula</div>
+        <div class="card-links"><a href="#contagion">demo below</a></div>
+        <div class="tags">python · numpy/scipy · network models</div>
       </article>
 
       <article class="card">
@@ -56,20 +36,10 @@
           <span class="chip priv">private · pre-registered</span>
         </div>
         <p>
-          Two pre-registered hypotheses: firms that rewrite their risk factors see higher volatility the following
-          year, and unusual hedging language in MD&amp;A precedes restatements. Both were fixed before any outcome
-          data was merged. The code won't unseal the confirmation years unless the pre-registration file is
-          committed and unchanged; it logs the commit hash and runs the confirmatory test once.
+          Two pre-registered tests on annual reports: whether rewritten risk factors predict volatility, and
+          whether hedging language predicts restatements. The EDGAR corpus is almost collected. No results yet.
         </p>
-        <ul>
-          <li>An exact Lazy Prices similarity replication, a sentence-level new-share measure, and a hedging classifier that falls back to a curated word list if LLM labels disagree with blind hand labels (Cohen's κ below 0.6).</li>
-          <li>With only ten fiscal-year clusters, inference uses t(9) and a Bonferroni split across the two hypotheses. 186 tests.</li>
-        </ul>
-        <p class="note">
-          Synthetic data only so far. The 2005–2020 EDGAR corpus (3.5 GB) is downloaded and split into 47 million
-          sentences, and 39,563 of 42,268 later 10-Ks are crawled. Nothing gets unsealed until the corpus is complete.
-        </p>
-        <div class="tags">python · sec edgar · nlp · deberta · cluster-robust inference · pre-registration</div>
+        <div class="tags">python · sec edgar · nlp</div>
       </article>
 
       <article class="card">
@@ -78,20 +48,34 @@
           <span class="chip open">open source · in progress</span>
         </div>
         <p>
-          A multi-agent RL environment where learning enterprises face a rule-based planner with a notched bonus,
-          a target ratchet and audits, to see whether Soviet-style misreporting emerges from the incentives alone.
-          A test fails the build if the environment hard-codes any pathology, and a CI guard keeps early code away
-          from the held-out phenomena.
-        </p>
-        <ul>
-          <li>Built and run: the environment, exact dynamic programming, independent PPO, a HiGHS oracle, a JAX port of the step function (NumPy parity to about 1e-13), and every pre-registered gate experiment.</li>
-          <li>From the labelled studies: with three times the training budget the learned economy collapses to near-zero output, and an evaluation shows it is a coordination trap. A lone producer loses, and everyone producing is better off.</li>
-        </ul>
-        <p class="note">
-          Gates G2 and G3 did not pass. PPO doesn't recover the single-enterprise DP optimum, and the learned
-          populations aren't converged, so everything after G3 is reported as a labelled study. The LLM study
-          hasn't run.
+          Multi-agent RL environment where firms answer to a Soviet-style planner that sets targets, audits
+          reports and raises targets after a good year. It tests whether misreporting emerges from those
+          incentives alone. Two pre-registered gates failed, so later results are exploratory.
         </p>
         <div class="card-links"><a href="https://github.com/Xocas12/gosplan-env" target="_blank" rel="noopener">repo ↗</a></div>
-        <div class="tags">python · multi-agent rl · ppo · jax · pre-registered gates · mechanism design</div>
+        <div class="tags">python · multi-agent rl · ppo · jax</div>
+      </article>
+      <article class="card">
+        <div class="card-top">
+          <h3><a href="https://github.com/Xocas12/battlelab" target="_blank" rel="noopener">battlelab · Monte Carlo battle analysis</a></h3>
+          <span class="chip open">open source</span>
+        </div>
+        <p>
+          Monte Carlo framework for working out why a battle went the way it did. Every parameter needs a
+          source, and each scenario shows where the real outcome falls among the simulated ones.
+        </p>
+        <div class="card-links"><a href="https://github.com/Xocas12/battlelab" target="_blank" rel="noopener">repo ↗</a></div>
+        <div class="tags">python · lua · monte carlo</div>
+      </article>
+      <article class="card">
+        <div class="card-top">
+          <h3><a href="https://github.com/Xocas12/galicia-eucalyptus" target="_blank" rel="noopener">Eucalyptus in Galicia · fire, forest and water</a></h3>
+          <span class="chip open">open source · preliminary</span>
+        </div>
+        <p>
+          Estimates how eucalyptus plantations affect native forest, wildfire and water in Galicia, from
+          satellite land-cover maps and double/debiased ML. Results so far are preliminary.
+        </p>
+        <div class="card-links"><a href="https://github.com/Xocas12/galicia-eucalyptus" target="_blank" rel="noopener">repo ↗</a></div>
+        <div class="tags">python · remote sensing · causal ml</div>
       </article>

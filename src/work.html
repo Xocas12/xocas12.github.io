@@ -11,18 +11,11 @@
           <span class="chip priv">private client work</span>
         </div>
         <p>
-          Land acquisition platform for Samford Group, where I'm the only engineer. It screens US parcels for
-          development and runs the team's acquisition, outreach and finance workflows. Roughly 200k lines of
-          product code, with more than that in tests.
+          Land acquisition platform for Samford Group, where I'm the only engineer. It scores US parcels for
+          development from 24 public data sources and runs the team's acquisition, outreach and finance work.
+          Analysts can also query it from Claude through an MCP connector.
         </p>
-        <ul>
-          <li>24 source adapters (FEMA flood, USFWS wetlands, USGS elevation, Census, OSM, listings and others) feed per-parcel floodplain share, slope, road frontage and lot yield.</li>
-          <li>Adding a county is one command: ingest the parcel dump, derive the FIPS code, run the full pipeline. There is no per-county code. A weekly job re-checks every county and rolls back any refresh that would drop data.</li>
-          <li>An MCP connector with 67 tools and OAuth sign-in lets analysts query and update the app from Claude. Write tools are off by default.</li>
-          <li>Issues close against tests named after them: about 7,000 JS test cases, 1,325 pytest tests and 246 browser checks. A script swaps the pre-fix code back in and requires those tests to fail.</li>
-          <li>Also a deck generator that computes yield two ways and flags disagreement, a vector tile server, invoice extraction from email, a cash-flow plan, and outreach with do-not-call suppression and database-level send dedup.</li>
-        </ul>
-        <div class="tags">python · postgis · node/express · react · mcp + oauth · bullmq/redis · gdal · railway</div>
+        <div class="tags">python · postgis · node/express · react · mcp</div>
       </article>
 
       <article class="card flagship">
@@ -33,18 +26,10 @@
         <div class="flagship-grid">
           <div style="display:flex; flex-direction:column; gap:10px; min-width:0">
             <p>
-              Watches Telegram channels and eight other open sources, merges corroborating reports into
-              geolocated events, and plots them on a public map. Seven Python services around PostGIS,
-              coordinated through a Postgres job queue.
+              Collects reports from Telegram and eight other open sources, merges the ones that describe the
+              same incident, and plots them on a public map. Reposts of one claim count once, and every event
+              links back to its raw sources.
             </p>
-            <ul>
-              <li>Every event links back through its sources to an append-only raw archive. Corrections are new rows, and derived tables rebuild from raw data and code.</li>
-              <li>Confidence is weighted by source independence, so fifty reposts of one claim count once. Corroboration can also come from other sensors: seismic stations, satellite fire detection, outage data.</li>
-              <li>Ingest uses deterministic NLP (GLiNER, fastText, gazetteer geocoding). An LLM only sees the ambiguous cases.</li>
-              <li>An investigation agent works through the same CLI people use. A CI test parses its skill files and fails if one uses a verb outside the documented contract.</li>
-              <li>Three small agents handle routine dev work. One proposes tasks from the roadmap, one turns approved issues into PRs through a signed webhook, and one screenshots the live map every eight hours and files a bug if it didn't render. I review and merge every PR myself.</li>
-            </ul>
-            {{VIXIA_UPDATE}}
             <div class="card-links"><a href="https://web-production-8af6c.up.railway.app/" target="_blank" rel="noopener">live map ↗</a></div>
           </div>
           <figure class="shot" style="margin:0">
@@ -52,7 +37,7 @@
             <figcaption>THE LIVE MAP · 616 EVENTS</figcaption>
           </figure>
         </div>
-        <div class="tags">python · fastapi · postgis + pgvector · sqlalchemy/alembic · sentence-transformers · maplibre gl · telegram mtproto · playwright + claude code agents · docker · railway + hetzner</div>
+        <div class="tags">python · fastapi · postgis · maplibre gl · docker</div>
       </article>
 
       <article class="card">
@@ -65,38 +50,11 @@
           <figcaption>A NEGOTIATION SESSION · IMAGE FROM CMU'S PROJECT PAGE</figcaption>
         </figure>
         <p>
-          Multiplayer wargaming platform CMU is building for classroom use from fall 2026. I worked on the
-          multi-agent backend and the facilitator frontend.
+          Multiplayer wargaming platform for CMU classes, starting fall 2026. I built the multi-agent backend
+          and the facilitator console.
         </p>
-        <ul>
-          <li>The engine combines fuzzy cognitive maps, a stock-and-flow model and an MDP. The LLM's only job inside it is translating a player's free-text decision into a change in world state. Scenario generation and adjudication are kept separate so one model never both sets and scores a problem.</li>
-          <li>Matrix-game adjudication for White Cell injects and rulings, with a human review gate.</li>
-          <li>Engine parameters were fit with a 150-job sweep on CMU's Wright HPC cluster instead of being hand-tuned.</li>
-          <li>A prompt-injection filter in front of the models, and a scenario-agnostic after-action review template.</li>
-          <li>Frontend: the facilitator console, with per-advisor chat monitoring, per-player token budgets an instructor can change mid-game, and advisors built from RAG document sets and remote MCP servers.</li>
-        </ul>
         <div class="card-links"><a href="https://www.cmu.edu/dietrich/ai/education/oge.html" target="_blank" rel="noopener">project page at cmu ↗</a></div>
-        <div class="tags">react + typescript · redux · websockets · fuzzy cognitive maps · mdp · multi-agent llm orchestration · mcp · rag</div>
-      </article>
-
-      <article class="card">
-        <div class="card-top">
-          <h3>ModMatch · compatibility-checked watch builds</h3>
-          <span class="chip live">private beta</span>
-        </div>
-        <figure class="shot">
-          <img src="{{IMG_MODMATCH}}" alt="ModMatch landing page: build a custom watch that actually fits, with an SVG watch illustration and part counts." loading="lazy">
-          <figcaption>LANDING PAGE</figcaption>
-        </figure>
-        <p>
-          PCPartPicker for Seiko mods. A six-step configurator checks fit as you go. Dimensions are stored as
-          tolerance ranges, so a pairing can pass, fail, or pass marginally with a warning, and curators can
-          override the rules with known-good or known-bad pairings. Prices from four Shopify stores and the
-          AliExpress API are normalized into one catalog every six hours, and a comparison view finds the
-          cheapest vendor mix for a build. Builds share by link without an account. Affiliate tracking covers
-          click logging with salted IP hashes through last-click attribution of commission CSVs.
-        </p>
-        <div class="tags">next.js 14 · typescript · prisma · postgres · vitest + playwright · railway</div>
+        <div class="tags">react + typescript · websockets · multi-agent llm · rag</div>
       </article>
 
 {{SYSTEMS_NEW}}
@@ -107,13 +65,11 @@
           <span class="chip open">used by 3 institutions</span>
         </div>
         <p>
-          At Leiden I led five engineers building an ETL pipeline over 30 million FDA adverse-event reports,
-          deployed on GCP with containerized CI/CD. Most of the work was cleaning: missing values, duplicates
-          and schema drift across decades of filings. A researcher's data request went from three weeks to two
-          hours, and non-programmers can run it themselves. Three research institutions use it.
+          ETL pipeline over 30 million FDA adverse-event reports, built at Leiden by a team of five that I led.
+          Data requests that took researchers three weeks now take two hours.
         </p>
         <div class="card-links"><a href="https://ludev.nl/portfolio/2025/1?year=2025" target="_blank" rel="noopener">project page at ludev ↗</a></div>
-        <div class="tags">python · etl · gcp · docker · ci/cd</div>
+        <div class="tags">python · etl · gcp · docker</div>
       </article>
 
       <article class="card">
@@ -122,14 +78,11 @@
           <span class="chip open">open source · mit</span>
         </div>
         <p>
-          A Claude Code skill that takes a rough product idea to a specified concept, following the
-          product-management method taught at CMU. It has two modes: a coach that stops at three decision
-          points for the user, and a one-shot generator that lists the assumptions it made. The model checks
-          its draft against a rubric before showing it, and the core numbers have to stay consistent from
-          problem sizing through pricing to market size.
+          A Claude Code skill that turns a rough product idea into a specified concept, using the product
+          method taught at CMU.
         </p>
         <div class="card-links"><a href="https://github.com/Xocas12/product-idea-coach" target="_blank" rel="noopener">repo ↗</a></div>
-        <div class="tags">agent design · prompt engineering · human-in-the-loop workflows</div>
+        <div class="tags">claude code · agent design</div>
       </article>
 
     </div>

@@ -2,9 +2,6 @@
     <div class="sec-head">
       <span class="idx">02</span><h2>Research</h2>
     </div>
-    <p class="sec-intro">
-      Research code. Each card says whether it has run on real data yet.
-    </p>
     <div class="cards">
 
 {{RESEARCH_KNOWN}}
@@ -17,14 +14,10 @@
           <span class="chip priv">research assistant · cmu</span>
         </div>
         <p>
-          With Dr. Hannah Bailey, on who sets the political agenda online. I turned the lab's novelty, transience
-          and resonance code into a configurable, tested package that runs on CMU's GPU cluster and applied it to
-          1.5 million Truth Social posts. K-means topic clustering, Mann-Whitney and Kolmogorov-Smirnov tests with
-          rank-biserial effect sizes, Gini coefficients and n-gram enrichment showed that 336 accounts (2.3% of
-          active users) produced 31% of all resonance. Much of that was coordinated copy-paste posting that peaked in an
-          August 2024 hashtag campaign.
+          With Dr. Hannah Bailey at CMU. I ran the lab's text-resonance pipeline on 1.5 million Truth Social posts.
+          336 accounts, 2.3% of active users, produced 31% of all resonance.
         </p>
-        <div class="tags">python · sentence-transformers · k-means · scipy.stats · slurm on cmu's gpu cluster</div>
+        <div class="tags">python · sentence-transformers · slurm</div>
       </article>
 
       <article class="card">
@@ -33,19 +26,15 @@
           <span class="chip open">open source</span>
         </div>
         <p>
-          Measures the gap between what states say about arms control and what they do, using 9,046 UN
-          General Debate speeches (1970–2023), 862k voting records and 30k SIPRI arms deals. Sentence
-          embeddings, change-point detection and log-odds analysis, run on a GPU cluster. Three results held
-          up. Treaty-aligned language precedes ratification by about four years (p = 0.008). States outside the
-          Arms Trade Treaty export 2.65× more drone value per deal. Fluency in treaty language correlates with
-          worse compliance (r = 0.215). The boilerplate remover written for the corpus is a separate tool and
-          cuts UN speech text by 17% on average.
+          Compares what states say about arms control at the UN with what they do, using 9,046 General Debate
+          speeches, UN votes and SIPRI arms-transfer data. Treaty language tends to precede ratification by about
+          four years.
         </p>
         <div class="card-links">
           <a href="https://github.com/xocas123/Arms-Control-and-Ethics-Project" target="_blank" rel="noopener">repo ↗</a>
           <a href="https://github.com/xocas123/UN-Corpus-Cleaning" target="_blank" rel="noopener">un-corpus-cleaning ↗</a>
         </div>
-        <div class="tags">python · sentence-transformers · lda · pelt change-point · hpc cluster · sipri/ungdc/v-dem</div>
+        <div class="tags">python · nlp · change-point detection</div>
       </article>
 
       <article class="card">
@@ -54,14 +43,11 @@
           <span class="chip open">thesis · leiden</span>
         </div>
         <p>
-          Tested whether language models understand humor the way people do, using theory-of-mind tiers as the
-          scale. Thousands of jokes scraped from Reddit's dark-humor communities, combined with a labeled humor
-          dataset. Models first classified whether a joke was funny, then predicted how the community received
-          it, with real vote counts as ground truth. The analysis was both statistical (correlation) and
-          qualitative (where the models failed).
+          Tested whether LLMs judge humor the way people do, with Reddit vote counts as ground truth. They handled
+          wordplay well and jokes that need theory of mind poorly.
         </p>
         <div class="card-links"><a href="https://github.com/xocas123/bachelor-thesis" target="_blank" rel="noopener">repo ↗</a></div>
-        <div class="tags">python · reddit api · deepseek + together ai · theory of mind · quant + qual analysis</div>
+        <div class="tags">python · llm evaluation</div>
       </article>
 
     </div>

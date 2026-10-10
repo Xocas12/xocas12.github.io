@@ -27,7 +27,7 @@ slots["CONTAGION_HTML"] = rd(PAD / "demo_contagion.html")
 slots["ACTIVITY_HTML"] = rd(PAD / "activity.html")
 forensics = (PAD / "demo_forensics.html").exists()
 slots["FORENSICS_SLOT"] = rd(PAD / "demo_forensics.html") if forensics else ""
-for k in ("IMG_OGE", "IMG_VIXIA", "IMG_MODMATCH"):
+for k in ("IMG_OGE", "IMG_VIXIA"):
     slots[k] = (HERE / (k.lower() + ".txt").replace("img_", "img_")).read_text(encoding="ascii") \
         if (HERE / (k.lower() + ".txt")).exists() else (HERE / ("img_" + k[4:].lower() + ".txt")).read_text(encoding="ascii")
 

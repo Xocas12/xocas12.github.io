@@ -149,6 +149,7 @@ def main():
     (out / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n'
                                      '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
                                      f"{urls}</urlset>\n", encoding="utf-8")
+    (out / "robots.txt").write_text(f"User-agent: *\nAllow: /\nDisallow: /preview/\n\nSitemap: {SITE_URL}sitemap.xml\n", encoding="utf-8")
     shutil.copytree(REPO / "papers", out / "papers", dirs_exist_ok=True)
     for f in REPO.glob("google*.html"):  # Search Console verification file
         shutil.copy(f, out / f.name)

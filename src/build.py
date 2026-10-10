@@ -20,6 +20,7 @@ PAGES = [  # file, nav label, <title>
     ("index", None, "Xocas Álvarez"),
     ("cv", "CV", "CV · Xocas Álvarez"),
     ("projects", "Projects", "Projects · Xocas Álvarez"),
+    ("writing", "Writing", "Writing · Xocas Álvarez"),
     ("other", "Other", "Other · Xocas Álvarez"),
 ]
 CONTACT = [

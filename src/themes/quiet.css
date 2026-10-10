@@ -5,7 +5,7 @@
   --chip-open-bg: #E6F7F4; --chip-open-fg: #0D8577; --crit: #E5484D; --crit-bg: #FDE8E8;
   --body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif; --display: var(--body);
   --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  --measure: 600px; --size: 15px; --label: 112px;
+  --measure: 880px; --size: 15.5px; --label: 168px;
 }
 @media (prefers-color-scheme: dark) { :root {
   color-scheme: dark; --bg: #111111; --surface: #161616; --surface-2: #1F1F1F; --ink: #EDEDED; --muted: #A1A1A1; --faint: #6F6F6F; --line: #262626;
@@ -33,20 +33,21 @@ footer a:hover { color: var(--ink); }
 
 /* home */
 .intro { padding-top: 16vh; }
-.intro h1 { font-size: 15px; font-weight: 500; }
+.intro h1 { font-size: 15.5px; font-weight: 500; }
 .role { margin: 0; color: var(--muted); }
-.lead { font-size: 15px; margin-top: 28px; max-width: none; }
-.now { color: var(--muted); max-width: none; }
+.lead { font-size: 15.5px; margin-top: 28px; max-width: 40em; }
+.now { color: var(--muted); max-width: 40em; }
 .go { gap: 18px; margin-top: 32px; }
 
 /* page structure */
-.page-title { font-size: 15px; font-weight: 500; margin: 72px 0 0; }
-section:not(.intro) { margin-top: 44px; display: grid; grid-template-columns: var(--label) minmax(0, 1fr); gap: 0 24px; }
+.page-title { font-size: 15.5px; font-weight: 500; margin: 72px 0 0; }
+section:not(.intro) { margin-top: 52px; display: grid; grid-template-columns: var(--label) minmax(0, 1fr); gap: 0 32px; }
+.sec-body p { max-width: 46em; }
 @media (max-width: 640px) { section:not(.intro) { grid-template-columns: minmax(0, 1fr); gap: 12px; } }
-h2 { font-size: 15px; font-weight: 400; color: var(--faint); }
+h2 { font-size: 15.5px; font-weight: 400; color: var(--faint); }
 .sec-body > * + * { margin-top: 14px; }
 .sub { font-size: 14px; }
-h3 { font-size: 15px; font-weight: 500; }
+h3 { font-size: 15.5px; font-weight: 500; }
 
 /* lists */
 ul.entries { gap: 22px; }
@@ -55,8 +56,6 @@ ul.entries { gap: 22px; }
 .entries .meta { margin: 0; font-size: 14px; text-align: right; }
 .entries p { grid-column: 1 / -1; margin-top: 2px; }
 .entries.compact { gap: 12px; }
-.entries.compact li { grid-template-columns: 1fr; }
-.entries.compact .meta { text-align: left; }
 @media (max-width: 480px) { .entries li { grid-template-columns: 1fr; } .entries .meta { text-align: left; } }
 
 .rows { gap: 22px; }

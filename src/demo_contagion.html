@@ -62,16 +62,15 @@
 <div class="demo" id="contagion">
   <h3>DebtRank on the 29 G-SIBs</h3>
   <p class="lede">
-    The 29 banks on the FSB's 2025 G-SIB list, with end-2024 CET1 and interbank totals. Pick a bank to fail.
-    Losses propagate through a reconstructed exposure network using differential DebtRank, ported from
-    contagion-lab.
+    The 29 global systemically important banks, with end-2024 capital. Pick one to fail and see how far the
+    losses spread. DebtRank, ported from contagion-lab.
   </p>
   <div class="controls">
     <div class="ctl">
       <label for="cx-share">Exposures kept inside the group</label>
       <input type="range" id="cx-share" min="5" max="100" step="5" value="35" aria-describedby="cx-share-val">
       <span class="val" id="cx-share-val">35% of each bank's interbank assets</span>
-      <span class="hint">The real share isn't public. Above about 40%, one failure spreads to most of the group.</span>
+      <span class="hint">The real share is unknown. Above about 40%, one failure reaches most banks.</span>
     </div>
     <div class="ctl">
       <label for="cx-seed">Bank that fails</label>
@@ -103,11 +102,9 @@
     </div>
   </div>
   <p class="fine-print">
-    Capital: CET1 at 31 Dec 2024 from each bank's 10-K or Pillar 3 report (RBC and TD at 31 Jan 2025) and the EBA 2025
-    transparency exercise, in EUR at BIS 2024Q4 rates. Interbank assets and liabilities: BCBS G-SIB assessment sample,
-    end-2024, intra-financial-system items. Bilateral exposures aren't public, so they're reconstructed by maximum
-    entropy from those totals, with the in-group share set by the slider. Simplified: no fire sales, no rescues,
-    and no banks outside these 29.
+    CET1 capital from bank filings and the EBA 2025 transparency exercise. Interbank totals from the BCBS G-SIB
+    sample, end-2024. Bilateral exposures are not public, so they are estimated by maximum entropy. No fire sales,
+    rescues or banks outside the 29.
   </p>
 </div>
 <div class="tip" id="cx-tip" hidden></div>

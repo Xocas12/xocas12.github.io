@@ -1,4 +1,4 @@
-"""Build the site: four pages from src/pages/, styled by one theme from src/themes/.
+"""Build the site: five pages from src/pages/, styled by one theme from src/themes/.
 
     python src/build.py OUTDIR                  # the site, in the default theme
     python src/build.py OUTDIR --theme mono     # the site, in another theme
@@ -6,6 +6,7 @@
 
 The demos (src/demo_*.{html,js}) and the commit heatmap (src/activity.*) go on the Other page.
 """
+import json
 import pathlib
 import re
 import shutil
@@ -29,7 +30,36 @@ CONTACT = [
     ("https://github.com/xocas123", "GitHub (older)"),
     ("https://www.linkedin.com/in/xocas-%C3%A1lvarez-21a250225/", "LinkedIn"),
 ]
-DESCRIPTION = "Xocas Álvarez, data and ML engineer in Barcelona."
+# Where the site is served. Change this if the repo is renamed or a custom domain is added.
+SITE_URL = "https://xocas12.github.io/xocas123.github.io/"
+# The code from Google Search Console's "HTML tag" verification method (the content="..." value).
+GOOGLE_VERIFICATION = ""
+DESCRIPTIONS = {
+    "index": "Xocas Álvarez is a data and ML engineer in Barcelona working on computational approaches to "
+             "social, economic and political questions: elections, finance, conflict and public records.",
+    "cv": "CV of Xocas Álvarez: sole engineer at Samford Group, MS from Carnegie Mellon, BSc from Leiden.",
+    "projects": "Projects by Xocas Álvarez: data platforms, election forensics, OSINT mapping and research code.",
+    "writing": "Policy memos, essays and a thesis by Xocas Álvarez on AI governance, arms control and cyber policy.",
+    "other": "Interactive demos and commit history from Xocas Álvarez.",
+}
+PERSON = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Xocas Álvarez",
+    "alternateName": ["Xocas Alvarez", "Xocas Álvarez Jorge", "Xocas Alvarez Jorge"],
+    "url": SITE_URL,
+    "email": "mailto:xocas04@gmail.com",
+    "jobTitle": "Data and ML engineer",
+    "description": DESCRIPTIONS["index"],
+    "worksFor": {"@type": "Organization", "name": "Samford Group"},
+    "homeLocation": {"@type": "Place", "name": "Barcelona, Spain"},
+    "nationality": ["Spain", "United States"],
+    "alumniOf": [{"@type": "CollegeOrUniversity", "name": "Carnegie Mellon University"},
+                 {"@type": "CollegeOrUniversity", "name": "Leiden University"}],
+    "knowsAbout": ["Data engineering", "Machine learning", "Election forensics", "OSINT", "Computational social science"],
+    "sameAs": ["https://www.linkedin.com/in/xocas-%C3%A1lvarez-21a250225/", "https://github.com/Xocas12",
+               "https://github.com/xocas123", "https://smoothcomp.com/nl/profile/1559413"],
+}
 
 CUR = ' aria-current="page"'
 rd = lambda p: p.read_text(encoding="utf-8")
@@ -77,9 +107,20 @@ def page(name, title, theme, root, preview):
     head = ['<meta charset="utf-8">',
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">',
             f"<title>{title}</title>",
-            f'<meta name="description" content="{DESCRIPTION}">']
+            f'<meta name="description" content="{DESCRIPTIONS[name]}">']
     if preview:
         head.append('<meta name="robots" content="noindex">')
+    else:
+        url = SITE_URL + ("" if name == "index" else f"{name}.html")
+        head += [f'<link rel="canonical" href="{url}">',
+                 f'<meta property="og:title" content="{title}">',
+                 f'<meta property="og:description" content="{DESCRIPTIONS[name]}">',
+                 f'<meta property="og:url" content="{url}">',
+                 f'<meta property="og:type" content="{"profile" if name == "index" else "website"}">']
+        if name == "index":
+            if GOOGLE_VERIFICATION:
+                head.append(f'<meta name="google-site-verification" content="{GOOGLE_VERIFICATION}">')
+            head.append(f'<script type="application/ld+json">{json.dumps(PERSON, ensure_ascii=False)}</script>')
     if fonts:
         head += ['<link rel="preconnect" href="https://fonts.googleapis.com">',
                  '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
@@ -104,6 +145,10 @@ def main():
     if theme not in THEMES:
         sys.exit(f"unknown theme {theme!r}; pick one of {THEMES}")
     build(out, theme)
+    urls = "".join(f"  <url><loc>{SITE_URL}{'' if n == 'index' else n + '.html'}</loc></url>\n" for n, _, _ in PAGES)
+    (out / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n'
+                                     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+                                     f"{urls}</urlset>\n", encoding="utf-8")
     shutil.copytree(REPO / "papers", out / "papers", dirs_exist_ok=True)
     if "--previews" in sys.argv:
         for t in THEMES:

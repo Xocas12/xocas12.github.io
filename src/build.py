@@ -31,7 +31,7 @@ CONTACT = [
     ("https://www.linkedin.com/in/xocas-%C3%A1lvarez-21a250225/", "LinkedIn"),
 ]
 # Where the site is served. Change this if the repo is renamed or a custom domain is added.
-SITE_URL = "https://xocas12.github.io/xocas123.github.io/"
+SITE_URL = "https://xocas12.github.io/"
 # The code from Google Search Console's "HTML tag" verification method (the content="..." value).
 GOOGLE_VERIFICATION = ""
 DESCRIPTIONS = {

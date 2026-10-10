@@ -1,7 +1,7 @@
-# xocas123.github.io
+# xocas12.github.io
 
 Personal site: five pages (home, CV, projects, writing, other) built from `src/` and published to
-GitHub Pages at https://xocas12.github.io/xocas123.github.io/.
+GitHub Pages at https://xocas12.github.io/.
 
 Every push to `main` runs `.github/workflows/pages.yml`, which builds the site and deploys it.
 

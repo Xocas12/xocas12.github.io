@@ -1,0 +1,72 @@
+<style>
+  .sac-wrap { position: relative; }
+  .sac-canvas {
+    width: 100%; height: auto; display: block; border-radius: 6px;
+    background: var(--surface-2); cursor: crosshair; touch-action: pan-y;
+  }
+  .sac-legend { display: flex; gap: 16px; flex-wrap: wrap; font: 12px var(--mono); color: var(--muted); }
+  .sac-legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .sac-legend i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .sac-src {
+    border: 1px solid var(--line); border-radius: 6px; background: var(--surface);
+    padding: 12px 14px; display: grid; gap: 7px;
+  }
+  .sac-src .ln {
+    font: 14px/1.5 var(--mono); color: var(--ink); letter-spacing: .02em;
+    word-break: break-word; background: var(--surface-2); padding: 8px 10px; border-radius: 4px;
+  }
+  .sac-src .who { font: 13px var(--body); color: var(--ink); }
+  .sac-src .who b { font-weight: 600; }
+  .sac-src .meta { font: 12px var(--mono); color: var(--muted); }
+  .sac-src .meta a { color: var(--accent-ink); }
+  .sac-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  @media (max-width: 640px) { .sac-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .sac-stats .v.nm { font-size: 15px; letter-spacing: .01em; }
+</style>
+
+<div class="demo" id="sac56">
+  <h3>The 1956 target list</h3>
+  <p class="lede">
+    In June 1956 the Strategic Air Command wrote down the places it would need to destroy, and ranked them.
+    All 2,339 plottable entries of the declassified study, transcribed in nuclear-probabilities and drawn at
+    its own coordinates. There is no basemap: every dot is a target, and what they draw is the Soviet urban
+    system as the planners saw it, down to the Trans-Siberian strung out across the east. Pull the tier slider
+    and the plan concentrates westward. The point of the panel underneath is that you can check it — it prints
+    the line as the page prints it, and links to the scan.
+  </p>
+  <div class="controls">
+    <div class="ctl">
+      <span class="ctl-label" id="sac-mode-label">Show</span>
+      <div class="seg" role="group" aria-labelledby="sac-mode-label">
+        <button type="button" id="sac-all" aria-pressed="true">Both lists</button>
+        <button type="button" id="sac-urb" aria-pressed="false">Urban-industrial</button>
+        <button type="button" id="sac-air" aria-pressed="false">Airfields</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <label for="sac-depth">Priority tier, in each list's own ranking</label>
+      <input type="range" id="sac-depth" min="1" max="1223" step="1" value="1223">
+      <span class="val" id="sac-depth-val">all tiers</span>
+    </div>
+  </div>
+  <div class="sac-wrap">
+    <canvas class="sac-canvas" id="sac-canvas" role="img" aria-label="Map of 2,339 targets from the 1956 Strategic Air Command study, plotted as points with no basemap, coloured by whether the entry is an urban-industrial complex or an airfield."></canvas>
+  </div>
+  <div class="sac-legend">
+    <span><i style="background:var(--accent)"></i> urban-industrial complex</span>
+    <span><i style="background:var(--teal)"></i> airfield</span>
+    <span class="m">hover the map to read an entry</span>
+  </div>
+  <div class="sac-src">
+    <div class="who" id="sac-who"><b>Moscow</b> — USSR, urban-industrial complex</div>
+    <div class="ln" id="sac-line">1 5150 MOSCOW 5545-03737</div>
+    <div class="meta" id="sac-meta"></div>
+  </div>
+  <div class="sac-stats">
+    <div class="stat"><div class="k">Targets shown</div><div class="v" id="sac-n">0</div><div class="s">of 2,339 plotted</div></div>
+    <div class="stat"><div class="k">Countries</div><div class="v" id="sac-c">0</div><div class="s">in the shown set</div></div>
+    <div class="stat"><div class="k">First on the complex list</div><div class="v nm">Moscow</div><div class="s">priority 1 of 1,223</div></div>
+    <div class="stat"><div class="k">First on the airfield list</div><div class="v nm">Bykhov</div><div class="s">priority 1 of 1,111</div></div>
+  </div>
+  <p class="fine-print" id="sac-note"></p>
+</div>

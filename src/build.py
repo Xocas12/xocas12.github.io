@@ -7,6 +7,8 @@
 The demos (src/demo_*.{html,js}) and the commit heatmap (src/activity.*) go on the Other page.
 """
 import json
+
+import check_sac
 import pathlib
 import re
 import shutil
@@ -15,6 +17,46 @@ import sys
 SRC = pathlib.Path(__file__).resolve().parent
 REPO = SRC.parent
 THEMES = ["quiet", "plain"]
+
+#: (slot, html fragment, js file, (placeholder, payload)). A demo is wired by appearing here,
+#: which is what keeps the JSON check below covering all of them rather than being written out
+#: once per demo and forgotten on the next one.
+DEMOS = [
+    ("CONTAGION", "demo_contagion.html", "demo_contagion.js", ("__GSIB_DATA__", "gsib_demo.json")),
+    ("FORENSICS", "demo_forensics.html", "demo_forensics.js", ("__FORENSICS_DATA__", "forensics.json")),
+    ("SAC", "demo_sac.html", "demo_sac.js", ("__SAC_DATA__", "sac1956.json")),
+    ("GALICIA", "demo_galicia.html", "demo_galicia.js", ("__GALICIA_DATA__", "galicia.json")),
+    ("GOSPLAN", "demo_gosplan.html", "demo_gosplan.js", ("__GOSPLAN_DATA__", "gosplan.json")),
+]
+
+#: Assertions on a payload beyond its being JSON, keyed by file name.
+PAYLOAD_CHECKS = {"sac1956.json": check_sac.check}
+
+
+def _reject_constant(name):
+    """json.loads accepts NaN, Infinity and -Infinity by default. JavaScript accepts them too,
+    which is the whole problem: a payload carrying a bare NaN parses here, evaluates there, and
+    the page quietly draws fewer points than its own counter reports. Make them loud."""
+    raise ValueError(f"bare {name} is JavaScript, not JSON")
+
+
+def payload(name):
+    """Read a demo payload, refusing anything that is not strict JSON.
+
+    The text is spliced into a <script> tag by string substitution, so nothing downstream will
+    ever parse it again -- this is the only place the mistake can be caught.
+    """
+    text = rd(SRC / name)
+    try:
+        json.loads(text, parse_constant=_reject_constant)
+    except ValueError as exc:
+        sys.exit(f"{name}: not valid JSON, refusing to inline it into a <script> tag -- {exc}")
+    extra = PAYLOAD_CHECKS.get(name)
+    if extra:
+        problems = extra(text)
+        if problems:
+            sys.exit(f"{name}: " + "; ".join(problems[:5]))
+    return text
 DEFAULT_THEME = "quiet"
 
 PAGES = [  # file, nav label, <title>
@@ -40,7 +82,7 @@ DESCRIPTIONS = {
     "cv": "CV of Xocas Álvarez: sole engineer at Samford Group, MS from Carnegie Mellon, BSc from Leiden.",
     "projects": "Projects by Xocas Álvarez: data platforms, election forensics, OSINT mapping and research code.",
     "writing": "Policy memos, essays and a thesis by Xocas Álvarez on AI governance, arms control and cyber policy.",
-    "other": "Interactive demos and commit history from Xocas Álvarez.",
+    "other": "Five interactive demos on public data, and commit history, from Xocas Álvarez.",
 }
 PERSON = {
     "@context": "https://schema.org",
@@ -78,12 +120,23 @@ def page(name, title, theme, root, preview):
     body = rd(SRC / "pages" / ("home.html" if name == "index" else name + ".html"))
     scripts = ""
     if name == "other":
-        body = (body.replace("{{CONTAGION}}", rd(SRC / "demo_contagion.html"))
-                    .replace("{{FORENSICS}}", rd(SRC / "demo_forensics.html"))
-                    .replace("{{ACTIVITY}}", rd(SRC / "activity.html")))
-        js = [rd(SRC / "demo_contagion.js").replace("__GSIB_DATA__", rd(SRC / "gsib_demo.json")),
-              rd(SRC / "demo_forensics.js").replace("__FORENSICS_DATA__", rd(SRC / "forensics.json")),
-              rd(SRC / "activity.js").replace("__ACTIVITY_DATA__", rd(SRC / "activity.json"))]
+        for slot, html, _, _ in DEMOS:
+            body = body.replace("{{" + slot + "}}", rd(SRC / html))
+        body = body.replace("{{ACTIVITY}}", rd(SRC / "activity.html"))
+        js = []
+        for _, _, src_js, (placeholder, data) in DEMOS:
+            text = rd(SRC / src_js)
+            # Exactly once. str.replace() substitutes every occurrence, so a placeholder named
+            # in a doc comment as well as in the code inlines the whole payload twice -- which
+            # is invisible in the page and cost 175 KB here before it was caught.
+            seen = text.count(placeholder)
+            if seen != 1:
+                sys.exit(f"{src_js}: {placeholder} appears {seen} times, expected exactly 1")
+            js.append(text.replace(placeholder, payload(data)))
+        js.append(rd(SRC / "activity.js").replace("__ACTIVITY_DATA__", payload("activity.json")))
+        stranded = sorted(set(re.findall(r"__[A-Z0-9_]+_DATA__", "".join(js))))
+        if stranded:
+            sys.exit(f"placeholders with no payload: {stranded}")
         scripts = "".join(f"<script>\n{s}\n</script>\n" for s in js)
     body = sections(body.replace("{{ROOT}}", root))
     left = re.findall(r"\{\{[A-Z_]+\}\}", body)

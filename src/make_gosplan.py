@@ -22,6 +22,12 @@ The repository's own headline pair compares notch_width 0.0 with cap 1.2 against
 to the notch. Its 10-cell sweep does contain the cap-held-fixed comparison, and that is what the
 page draws. The cost is that four of the five cells pool 5 seeds where the 0.0 cell pools 30.
 
+Each cell is trimmed to its first and last non-empty bin and carries `i0`, the index of its
+first kept bin. The payload also ships `nb`, the bin count, so the page draws every panel on the
+same axis, LO to HI, rather than stretching each trimmed cell across the plot, which moved the
+plan line and the ticks on every click. `check()` holds those fields together, and the site
+build runs it as well.
+
 Per-seed rows ship as share and verdict only. `b_hat` values like
 `286,021.884 [78,863.377, 313,889.486]` are a vanishing denominator rather than an estimate, and
 rendering them to three decimals would imply a precision that does not exist.
@@ -58,6 +64,32 @@ ROW = re.compile(
     r"^\| (notched|smooth) \| (\d+) \| (\S+) \| \[([^\]]*)\] \| (\S+) \| (\S+) \| (\S+) \| (\S+) \| (\w+) \|$",
     re.M,
 )
+
+
+def check(payload_text: str) -> list[str]:
+    """Return problems with the histogram domain. Empty means every panel fits the one axis.
+
+    demo_gosplan.js draws every cell on a single axis from `lo` to `lo + nb * w`, puts bin `i0 + i`
+    of a cell at the same x in every panel, and draws the plan line and the ticks on that axis. If
+    the fields disagree, bars land off the axis or the plan line moves between panels.
+    """
+    d = json.loads(payload_text)
+    lo, w, nb = d.get("lo"), d.get("w"), d.get("nb")
+    if not isinstance(nb, int) or nb <= 0:
+        return [f"nb must be a positive bin count, got {nb!r}"]
+    if not all(isinstance(v, (int, float)) for v in (lo, w)) or w <= 0:
+        return [f"lo and w must be numbers with w > 0, got lo={lo!r} w={w!r}"]
+    problems = []
+    hi = lo + nb * w
+    if abs(hi - HI) > 1e-9:
+        problems.append(f"lo + nb * w = {lo} + {nb} * {w} = {hi:.6g}, expected {HI}")
+    if not lo < 1.0 < hi:
+        problems.append(f"the plan, 1.00, is outside the axis [{lo}, {hi:g}]")
+    for cell in d.get("cells", []):
+        i0, k = cell.get("i0"), len(cell.get("c", []))
+        if not isinstance(i0, int) or i0 < 0 or i0 + k > nb:
+            problems.append(f"notch width {cell.get('w')}: i0 = {i0!r} plus {k} bins does not fit in nb = {nb}")
+    return problems
 
 
 def collect(repo: pathlib.Path) -> dict:
@@ -128,7 +160,7 @@ def build(repo: pathlib.Path) -> tuple[str, dict]:
     for k in seeds:
         seeds[k].sort(key=lambda x: x["share"])
 
-    payload = {"lo": LO, "w": BW, "cells": out_cells, "seeds": seeds, "thresh": THRESH}
+    payload = {"lo": LO, "w": BW, "nb": NBINS, "cells": out_cells, "seeds": seeds, "thresh": THRESH}
     text = json.dumps(payload, separators=(",", ":"), allow_nan=False)
 
     got = {
@@ -157,6 +189,13 @@ def main() -> int:
             bad.append(k)
     if bad:
         print(f"derived values disagree with the repository's published record: {bad}", file=sys.stderr)
+        return 1
+    problems = check(text)
+    d = json.loads(text)
+    print(f"  {'domain':20} lo {d.get('lo')!r}, nb {d.get('nb')!r}, w {d.get('w')!r}"
+          + ("" if not problems else f"   EXPECTED lo + nb * w = {HI}"))
+    if problems:
+        print("histogram domain fields disagree: " + "; ".join(problems), file=sys.stderr)
         return 1
 
     if args.check:

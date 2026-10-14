@@ -1,12 +1,17 @@
 /* Bunching at the plan notch: reported fulfilment ratios from trained gosplan-env populations.
  *
- * Data: the gosplan payload, substituted at build time: {lo, w (bin width), thresh, cells[{w, n, below, above, i0, c[],
- * peak, peakRho}], seeds{notched[], smooth[]}}.
+ * Data: the gosplan payload, substituted at build time: {lo, w (bin width), nb (bin count), thresh,
+ * cells[{w, n, below, above, i0, c[], peak, peakRho}], seeds{notched[], smooth[]}}.
  *
  * Only the cap=1.2 cells are here, so the notch width is the only parameter that moves between
  * panels. The y axis is per panel and square-rooted: one bin holds 20 per cent of all reports
  * in the sharpest cell, and on a shared linear axis that is a single needle beside two hundred
  * flat bins, which destroys the shape it is meant to show.
+ *
+ * The x axis is shared: every panel spans all nb bins, lo to lo + nb * w, and a cell's trimmed
+ * counts start at bin i0. Fitting each panel to its own non-empty bins moved the plan line and
+ * the ticks on every click and flattened the walk off the plan from 0.02 to 0.1, because each
+ * panel's range widened almost in step with its peak.
  */
 (function () {
   "use strict";
@@ -47,14 +52,16 @@
       T = 30,
       B = 40;
     var n = c.c.length;
-    var bw = (W - L - R) / n;
+    var hi = D.lo + D.nb * D.w;
+    var bw = (W - L - R) / D.nb;
     var max = 0;
     for (var i = 0; i < n; i++) if (c.c[i] > max) max = c.c[i];
     var pk = c.c.indexOf(max);
     // sqrt so the tall bin does not flatten the rest into the axis
     var y = function (v) { return H - B - Math.sqrt(v / max) * (H - T - B); };
-    var xAt = function (i) { return L + i * bw; };
-    var rho = function (i) { return D.lo + (c.i0 + i + 0.5) * D.w; };
+    // left edge of this cell's i-th bin, on the axis every panel shares
+    var xAt = function (i) { return L + (c.i0 + i) * bw; };
+    var xRho = function (v) { return L + ((v - D.lo) / (D.nb * D.w)) * (W - L - R); };
 
     var p = ['<text class="ttl" x="0" y="13">REPORTED FULFILMENT RATIO, NOTCH WIDTH ' +
       (c.w === 0 ? "0 (SHARP)" : c.w) + "</text>"];
@@ -65,7 +72,7 @@
         '" height="' + (H - B - y(c.c[i])).toFixed(1) + '"></rect>');
     }
     // the plan target
-    var one = L + ((1.0 - (D.lo + c.i0 * D.w)) / (n * D.w)) * (W - L - R);
+    var one = xRho(1.0);
     p.push('<line class="notch" x1="' + one.toFixed(1) + '" y1="' + T + '" x2="' + one.toFixed(1) +
       '" y2="' + (H - B) + '"></line>');
     p.push('<text x="' + one.toFixed(1) + '" y="' + (T - 4) + '" text-anchor="middle">plan = 1.00</text>');
@@ -77,10 +84,12 @@
       '" text-anchor="' + (right ? "start" : "end") + '">' + c.peak.toFixed(2) + "% at " +
       c.peakRho.toFixed(3) + "</text>");
     p.push('<line class="ax" x1="' + L + '" y1="' + (H - B) + '" x2="' + (W - R) + '" y2="' + (H - B) + '"></line>');
-    for (var t = 0; t <= 4; t++) {
-      var v = rho(0) + (t / 4) * (n * D.w);
-      p.push('<text x="' + (L + (t / 4) * (W - L - R)).toFixed(1) + '" y="' + (H - B + 14) +
-        '" text-anchor="middle">' + v.toFixed(2) + "</text>");
+    // Ticks every 0.10 along the shared axis, on bin edges, so they read the same in every panel
+    // and the 1.00 tick sits on the plan line. The stubs beside the end ticks count the reports
+    // beyond them.
+    for (var k = Math.ceil(D.lo * 10 - 1e-9); k <= Math.floor(hi * 10 + 1e-9); k++) {
+      p.push('<text x="' + xRho(k / 10).toFixed(1) + '" y="' + (H - B + 14) +
+        '" text-anchor="middle">' + (k / 10).toFixed(2) + "</text>");
     }
     // overflow stubs, labelled: dropping them silently would be a lie about where the mass is
     if (c.below) {

@@ -9,6 +9,7 @@ The demos (src/demo_*.{html,js}) and the commit heatmap (src/activity.*) go on t
 import json
 
 import check_sac
+import make_gosplan
 import pathlib
 import re
 import shutil
@@ -30,7 +31,7 @@ DEMOS = [
 ]
 
 #: Assertions on a payload beyond its being JSON, keyed by file name.
-PAYLOAD_CHECKS = {"sac1956.json": check_sac.check}
+PAYLOAD_CHECKS = {"sac1956.json": check_sac.check, "gosplan.json": make_gosplan.check}
 
 
 def _reject_constant(name):

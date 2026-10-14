@@ -8,6 +8,7 @@ The demos (src/demo_*.{html,js}) and the commit heatmap (src/activity.*) go on t
 """
 import json
 
+import check_forensics
 import check_sac
 import pathlib
 import re
@@ -29,8 +30,9 @@ DEMOS = [
     ("GOSPLAN", "demo_gosplan.html", "demo_gosplan.js", ("__GOSPLAN_DATA__", "gosplan.json")),
 ]
 
-#: Assertions on a payload beyond its being JSON, keyed by file name.
-PAYLOAD_CHECKS = {"sac1956.json": check_sac.check}
+#: Assertions on a payload beyond its being JSON, keyed by file name. check_forensics also holds the
+#: turnout demo's lede to the numbers in its payload.
+PAYLOAD_CHECKS = {"sac1956.json": check_sac.check, "forensics.json": check_forensics.check}
 
 
 def _reject_constant(name):

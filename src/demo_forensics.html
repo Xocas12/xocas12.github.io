@@ -24,9 +24,15 @@
 <div class="demo" id="forensics">
   <h3>Integer-percentage turnout test</h3>
   <p class="lede">
-    Officials given a turnout target report whole-number percentages more often than chance allows. Russian
-    precinct data, 2011 and 2018, run through forensic-elections. Amber bars are whole percentages. The line is
-    what chance predicts.
+    Kobak, Shpilkin and Pshenichnikov (2016) found that Russian precincts, in elections up to 2012, reported
+    whole-number percentages, such as a turnout of 85.0% or 95.0%, more often than chance allows, and read it as
+    officials writing down a target instead of a count. The same test, run with forensic-elections on 93,601
+    precincts of the 2018 presidential election, finds 11,907 on a whole percent where chance predicts
+    10,818&nbsp;±&nbsp;90: 1,089 too many, a z-score of 12.2, mostly at turnouts of 80% and above. The
+    highlighted bars are whole percentages; the line is what chance predicts. This is a pattern, not a verdict on
+    any precinct, and the false-positive control, which should find nothing in Poland 2010 and Spain 2011, has
+    not been run (<a href="https://github.com/Xocas12/forensic-elections/blob/22e373b93edd1e7a15b50adf8dde26c9eaf26d6c/RESULTS.md#what-is-not-claimed">what
+    the results do not claim</a>).
   </p>
   <div class="controls">
     <div class="ctl">

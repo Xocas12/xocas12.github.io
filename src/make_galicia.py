@@ -22,11 +22,20 @@ The decode is recoverable because `src/eucalyptus_impact/real/brief.py` draws th
 `imshow(..., interpolation="nearest")` over a plain (235, 230) array at 140 dpi, so each 1 km
 cell occupies about 2.008 x 2.008 output pixels -- enough to sample cell centres. Panel origins
 were fitted by minimising the disagreement between the pixel at a cell centre and the pixels at
-0.18 and 0.82 across it; they are constants here because the figure is a committed file.
+0.18 and 0.82 across it; they are constants here because the figure is a committed file. That
+fit only fixes where inside a cell the samples fall. An origin a whole cell out still samples
+clean cell centres, one cell over, so the whole-cell part is pinned by the land-mask check below.
 
-It is only publishable because it is checked: the recovered eucalyptus-2024 area must land within
-half a per cent of the hectares `informe.md` states, and this script exits non-zero if it does
-not. If the figure is ever regenerated with a different layout, that check is what fails rather
+It is only publishable because it is checked, and this script exits non-zero if either check
+fails:
+
+  - the recovered eucalyptus-2024 area must land within half a per cent of the hectares
+    `informe.md` states;
+  - every panel draws the same 29,565 cells, so every panel read must decode exactly the
+    eucalyptus-2024 panel's land mask, to the cell. A panel origin a whole cell out fails this
+    by hundreds of cells, and would otherwise pair its values with the neighbouring cells.
+
+If the figure is ever regenerated with a different layout, those checks are what fail rather
 than the page silently going stale.
 
 What is shipped, and what is not
@@ -42,10 +51,12 @@ The figure has six panels. Three are deliberately not shipped:
     own projection band for restoring 25 per cent of eucalyptus crosses zero.
   - Eucalyptus 2017, because without the change layer the 2024 layer says everything it says.
 
-Each panel decodes 29,565 cells but not quite the SAME cells -- a few hundred fail the
-colour-residual test in one panel and pass in another -- so the drawing mask is the
-eucalyptus-2024 panel's own, the one the area check validates, and the other two layers carry an
-explicit no-data list rather than being silently filled with zero.
+The native-broadleaf and burnt layers used to be read from origins a whole cell out (COL_X[0]
+one cell right, ROW_Y[1] one cell low), so each burnt value was drawn one row north of the cell
+it describes and each native value one row north and one column west. The 403 and 625 land
+cells that left uncovered were put down to colour-residual failures and shipped as no-data
+lists. With the origins corrected every panel decodes the same cells, and the payload carries no
+no-data list.
 """
 
 from __future__ import annotations
@@ -61,8 +72,11 @@ import numpy as np
 
 NX, NY = 230, 235          # GRID_1KM over BBOX (465000, 4620000, 695000, 4855000), EPSG:25829
 SCALE = 2.008              # output pixels per cell at the figure's 140 dpi
-ROW_Y = (114.4, 683.6)     # top and bottom panel row origins, fitted once
-COL_X = (37.95, 627.5, 1224.95)
+#: Panel origins in output pixels: top and bottom rows, left, middle and right columns. The
+#: right-hand column (change, priority) has no shipped panel; its origin was checked by decoding
+#: the priority panel, whose land mask matches the eucalyptus-2024 mask cell for cell.
+ROW_Y = (114.4, 681.592)
+COL_X = (35.942, 627.5, 1218.926)
 BG_TOL, RESIDUAL_TOL = 9, 18
 
 #: Panels actually read: (name, column, row, colormap name in reporting.py)
@@ -150,6 +164,22 @@ def delta(idx: np.ndarray) -> list[int]:
     return np.diff(np.concatenate([[0], idx])).tolist()
 
 
+def mask_mismatches(grids: dict[str, np.ndarray], land: np.ndarray) -> list[str]:
+    """Panels whose decoded land mask is not `land`, with the cells that differ each way.
+
+    Every panel is the same 29,565 cells drawn in a different colour, so a correctly placed
+    origin reproduces the mask exactly. An origin a whole cell out leaves hundreds of cells
+    uncovered, all along the same side of the coast.
+    """
+    out = []
+    for name, grid in grids.items():
+        m = np.isfinite(grid)
+        extra, missing = int((m & ~land).sum()), int((land & ~m).sum())
+        if extra or missing:
+            out.append(f"{name}: {extra} cells off the mask, {missing} on it with no value")
+    return out
+
+
 def build(repo: pathlib.Path) -> tuple[str, dict]:
     try:
         from PIL import Image
@@ -165,6 +195,10 @@ def build(repo: pathlib.Path) -> tuple[str, dict]:
     grids = {n: decode_panel(im, c, r, cm[k], cm["SURFACE"]) for n, c, r, k in PANELS}
     land = np.isfinite(grids["euc"])
     n = int(land.sum())
+    off = mask_mismatches(grids, land)
+    if off:
+        sys.exit("decoded land masks differ from the eucalyptus-2024 panel's (hundreds of cells "
+                 "means a panel origin is a whole cell out): " + "; ".join(off))
 
     euc, nat, brn = (grids[k][land] for k in ("euc", "nat", "burn"))
     euc_ha = float(np.nansum(euc) * 100)
@@ -177,11 +211,9 @@ def build(repo: pathlib.Path) -> tuple[str, dict]:
         "mask": rle(land),
         "euc": nibbles(euc),
         "nat": nibbles(nat),
-        "nd_nat": delta(np.flatnonzero(np.isnan(nat))),
         "burn": {
             "i": delta(nz),
             "v": np.clip(np.rint(brn[nz] * 15), 1, 15).astype(int).tolist(),
-            "nd": delta(np.flatnonzero(np.isnan(brn))),
         },
     }
     text = json.dumps(payload, separators=(",", ":"), allow_nan=False)

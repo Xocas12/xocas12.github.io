@@ -1,13 +1,15 @@
 /* Galicia at 1 km: where eucalyptus grows against where it burned.
  *
  * Data: the Galicia payload, substituted at build time: {ny, nx, n, mask (RLE from a False run), euc, nat (base64, 4 bits a
- * cell over the masked cells in raster order), burn {i: delta indices of non-zero cells, v: 4-bit
- * values}}. Every layer has a value on every masked cell: make_galicia.py refuses to write a
- * panel whose land mask differs from the eucalyptus one, and the build checks the payload.
+ * cell over the masked cells in raster order), euc_lut, nat_lut (16 entries: what each level
+ * decodes to), burn {i: delta indices of non-zero cells, v: 4-bit values}, bin_edges, bins
+ * ([cells, mean burnt share] per eucalyptus bin), report_ha {euc, nat}}. Every layer has a value
+ * on every masked cell: make_galicia.py refuses to write a panel whose land mask differs from
+ * the eucalyptus one, and the build checks the payload.
  *
  * The grid is decoded from the figure the repository commits, not from a table, because the
- * repository commits no table. The decode was checked against the report's own hectares before
- * it was packed; the note under the chart says so.
+ * repository commits no table. The build decodes the payload as unpack() does and refuses it if
+ * either area is more than half a per cent off the report's; the note gives both figures.
  */
 (function () {
   "use strict";
@@ -32,12 +34,15 @@
     }
   })();
 
-  function unpack(b64) {
+  // Level q decodes to lut[q], the mean of the values that rounded to it, not to q/15. Read as
+  // q/15, every value under 1/30 is zero, half the cells, and the area tiles summed from them
+  // came out a per cent under the report. check_galicia.py decodes the same way.
+  function unpack(b64, lut) {
     var bin = atob(b64);
     var out = new Float32Array(N);
     for (var i = 0; i < N; i++) {
       var byte = bin.charCodeAt(i >> 1);
-      out[i] = ((i & 1) === 0 ? byte >> 4 : byte & 15) / 15;
+      out[i] = lut[(i & 1) === 0 ? byte >> 4 : byte & 15];
     }
     return out;
   }
@@ -51,8 +56,8 @@
     return out;
   }
 
-  var euc = unpack(D.euc);
-  var nat = unpack(D.nat);
+  var euc = unpack(D.euc, D.euc_lut);
+  var nat = unpack(D.nat, D.nat_lut);
   var burn = new Float32Array(N);
   (function () {
     var idx = undelta(D.burn.i);
@@ -175,20 +180,15 @@
     });
   });
 
-  // ---- the binned curve, computed here from the grid, and the project's own estimates
+  // ---- the binned curve, shipped in the payload, and the project's own estimates
   function drawBins() {
-    var edges = [0, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 1.01];
+    // Computed by make_galicia.py from the full-resolution decode, not here from the 4-bit
+    // layers: binned at sixteen levels, a cell at 4 per cent counts as 7 and lands a bin over,
+    // and the first bar read 4.9 under a lede that says 4.6.
+    var edges = D.bin_edges;
     var bins = [];
     for (var b = 0; b < edges.length - 1; b++) {
-      var s = 0;
-      var c = 0;
-      for (var i = 0; i < N; i++) {
-        if (euc[i] >= edges[b] && euc[i] < edges[b + 1]) {
-          s += burn[i];
-          c++;
-        }
-      }
-      bins.push({ lo: edges[b], hi: edges[b + 1], n: c, v: c ? s / c : 0 });
+      bins.push({ lo: edges[b], hi: edges[b + 1], n: D.bins[b][0], v: D.bins[b][1] });
     }
     var W = 420,
       H = 190,
@@ -253,8 +253,26 @@
     totE += euc[i2];
     totN += nat[i2];
   }
-  document.getElementById("gl-euc-ha").textContent = Math.round((totE * 100) / 1000);
-  document.getElementById("gl-nat-ha").textContent = Math.round((totN * 100) / 1000);
+  // A cell is a square kilometre, 100 ha; the tiles are in thousands.
+  function kha(cells) {
+    return Math.round((cells * 100) / 1000);
+  }
+  // How far a tile is from the report's figure, worked from the same sum the tile rounds, so the
+  // note's percentage is about the number on the tile.
+  function versus(cells, ref) {
+    var pct = (100 * (cells * 100 - ref)) / ref;
+    if (Math.abs(pct) < 0.05) return "within 0.1 per cent";
+    return Math.abs(pct).toFixed(1) + " per cent " + (pct < 0 ? "under" : "over");
+  }
+  function ha(ref) {
+    return String(ref).replace(/\B(?=(\d{3})+$)/g, ",") + " ha";
+  }
+  var REF = D.report_ha;
+  document.getElementById("gl-euc-ha").textContent = kha(totE);
+  document.getElementById("gl-nat-ha").textContent = kha(totN);
+  // The lede quotes the first and last bars, in the bars' own rounding.
+  document.getElementById("gl-bin-first").textContent = (100 * D.bins[0][1]).toFixed(1);
+  document.getElementById("gl-bin-last").textContent = (100 * D.bins[D.bins.length - 1][1]).toFixed(1);
 
   document.getElementById("gl-note").textContent =
     "Model output, not a survey. The species map is trained on cleaned OpenStreetMap labels, " +
@@ -263,8 +281,10 @@
     "plots the plot-by-plot agreement is F1 0.45, and the totals match better than the cells do " +
     "(the map calls 30.4 per cent of wooded plots eucalyptus, the plots list 27.5 per cent). The " +
     "grid itself was read back off the figure the repository publishes, because the repository " +
-    "commits the figure and not the table; the recovered area comes within 0.2 per cent of the " +
-    "hectares the report states. The binned bars are a correlation I computed from that grid, not " +
+    "commits the figure and not the table. Summed, it gives " + kha(totE) + " thousand ha of " +
+    "eucalyptus against the report's " + ha(REF.euc) + " for 2024 (" + versus(totE, REF.euc) + "), and " +
+    kha(totN) + " thousand ha of native broadleaf against its " + ha(REF.nat) + " for 2017 (" +
+    versus(totN, REF.nat) + "). The binned bars are a correlation I computed from that grid, not " +
     "a result the project published. The intervals are the project's own, and the one that matters " +
     "for restoration — eucalyptus against native broadleaf rather than against farmland — crosses " +
     "zero. Its robustness value is 0.017: an unmeasured confounder explaining 1.7 per cent of the " +

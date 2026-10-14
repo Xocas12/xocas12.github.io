@@ -38,6 +38,15 @@
     });
   }
 
+  // Share of a panel's reports, to one decimal; a non-empty share too small to show is "<0.1%".
+  function pct(k, n) {
+    var v = (100 * k) / n;
+    return v > 0 && v < 0.05 ? "<0.1%" : v.toFixed(1) + "%";
+  }
+
+  // The generator's upper bin edge (HI in make_gosplan.py): reports at or above it are the ">" stub.
+  var HI = 1.3;
+
   function drawHist() {
     var c = D.cells[sel];
     var W = 900,
@@ -82,19 +91,31 @@
       p.push('<text x="' + (L + (t / 4) * (W - L - R)).toFixed(1) + '" y="' + (H - B + 14) +
         '" text-anchor="middle">' + v.toFixed(2) + "</text>");
     }
-    // overflow stubs, labelled: dropping them silently would be a lie about where the mass is
-    if (c.below) {
-      p.push('<rect class="stub" x="' + (L - 26) + '" y="' + (H - B - 34) + '" width="18" height="34"></rect>');
-      p.push('<text x="' + (L - 17) + '" y="' + (H - B + 14) + '" text-anchor="middle">&lt;</text>');
-      p.push('<text x="' + (L - 17) + '" y="' + (H - B - 40) + '" text-anchor="middle">' +
-        c.below.toLocaleString("en-GB") + "</text>");
+    // Overflow stubs, on the bars' own square-root scale and labelled with their share of the
+    // panel. Dropping them silently would be a lie about where the mass is, and so would drawing
+    // them at a fixed height: at width 0.25 the "<" stub holds 36 per cent of the reports and to
+    // scale would stand 8.6 times the plot height, while at width 0 the ">" stub is one report.
+    // A stub taller than the plot is cut at the plot top and marked with a break.
+    function stub(k, x0, glyph, what) {
+      var over = Math.sqrt(k / max);
+      var h = Math.min(over, 1) * (H - T - B);
+      var top = H - B - h;
+      var share = pct(k, c.n);
+      p.push('<rect class="stub" x="' + x0 + '" y="' + top.toFixed(1) + '" width="18" height="' +
+        h.toFixed(1) + '"><title>' + esc(k.toLocaleString("en-GB") + (k === 1 ? " report " : " reports ") +
+        what + ", " + share + " of this panel" + (over > 1 ? "; to scale the stub would stand " +
+        over.toFixed(1) + " times the plot height" : "")) + "</title></rect>");
+      if (over > 1) {
+        var yb = T + 12;
+        p.push('<path class="brk" d="M' + (x0 - 3) + " " + (yb + 4) + "L" + (x0 + 21) + " " + (yb - 4) +
+          "V" + yb + "L" + (x0 - 3) + " " + (yb + 8) + 'Z"></path>');
+      }
+      p.push('<text x="' + (x0 + 9) + '" y="' + (H - B + 14) + '" text-anchor="middle">' + glyph + "</text>");
+      p.push('<text x="' + (x0 + 9) + '" y="' + (top - 6).toFixed(1) + '" text-anchor="middle">' +
+        esc(share) + "</text>");
     }
-    if (c.above) {
-      p.push('<rect class="stub" x="' + (W - R + 8) + '" y="' + (H - B - 34) + '" width="18" height="34"></rect>');
-      p.push('<text x="' + (W - R + 17) + '" y="' + (H - B + 14) + '" text-anchor="middle">&gt;</text>');
-      p.push('<text x="' + (W - R + 17) + '" y="' + (H - B - 40) + '" text-anchor="middle">' +
-        c.above.toLocaleString("en-GB") + "</text>");
-    }
+    if (c.below) stub(c.below, L - 26, "&lt;", "below " + D.lo.toFixed(2));
+    if (c.above) stub(c.above, W - R + 8, "&gt;", "at or above " + HI.toFixed(2));
     p.push('<text x="' + (W / 2) + '" y="' + (H - 6) +
       '" text-anchor="middle">reported / planned, bins of ' + D.w +
       ' &middot; bar height is the square root of the count</text>');
@@ -104,6 +125,11 @@
     document.getElementById("gp-peak-s").textContent =
       "one bin of " + D.w + ", at " + c.peakRho.toFixed(3);
     document.getElementById("gp-n").textContent = c.n.toLocaleString("en-GB");
+    // bins from global index (1.00 - lo) / w up start at or above 1.00: reports at or above plan
+    var plan = Math.round((1.0 - D.lo) / D.w), met = c.above;
+    for (var i = 0; i < n; i++) if (c.i0 + i >= plan) met += c.c[i];
+    document.getElementById("gp-n-s").textContent =
+      "from trained populations, " + pct(met, c.n) + " at or above plan";
   }
 
   function drawSeeds() {
@@ -148,7 +174,10 @@
     "notched runs flatly contradict the pooled picture, two of them with no reports in the window " +
     "at all, which is why every run is plotted rather than their average. The panels hold the " +
     "overfulfilment cap fixed at 1.2 so the notch width is the only thing changing; the " +
-    "repository's own headline pair moves both at once. And the training budget is itself a " +
+    "repository's own headline pair moves both at once. In every panel the bonus on a report ρ " +
+    "is B(ρ) = β·Λ(ρ − 1) + s·clip(ρ − 1, 0, 0.2), with β = 1, s = 0.331 and Λ(x) = " +
+    "1/(1 + e^(−x/w)) at notch width w, or a step paying 1 from x = 0 when w = 0; at w = 0.25 " +
+    "it is 0.40 at 0.90, 0.50 at 1.00 and 0.83 at 1.30. And the training budget is itself a " +
     "finding: tripling it collapses the same economy to near-zero output, so each bar is a point " +
     "on a learning trajectory rather than a steady state.";
 

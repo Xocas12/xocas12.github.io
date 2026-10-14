@@ -7,6 +7,7 @@
  *   p       priority tier within that list
  *   c       index into countries
  *   pg      PDF page of the scan
+ *   src     the scan PDF for each list, indexed by k; pg counts pages in it
  *   q       the printed line, with "~" standing for the coordinate la/lo render and "^" for the
  *           leading priority token p carries. Put both back and you have the line as printed --
  *           make_sac.py expands all 2,339 and asserts each reproduces its original byte for
@@ -171,6 +172,8 @@
     elLine.textContent = quoteOf(i);
     // The longitudes shifted past 180 for drawing must be shown as the page prints them.
     var lo = D.lo[i] > 180 * 60 ? D.lo[i] - 360 * 60 : D.lo[i];
+    // src is the scan PDF itself (make_sac.py resolves it), so #page= opens it at the line.
+    // A viewer that ignores the fragment opens page 1, and the page number is printed anyway.
     elMeta.innerHTML =
       "as printed on PDF page " +
       D.pg[i] +
@@ -181,6 +184,8 @@
       (lo < 0 ? "" : "E") +
       " &middot; <a href='" +
       D.src[D.k[i]] +
+      "#page=" +
+      D.pg[i] +
       "' target='_blank' rel='noopener'>the scan at the National Security Archive &#8599;</a>";
   }
 
@@ -254,7 +259,10 @@
   document.getElementById("sac-note").textContent =
     "SAC's Atomic Weapons Requirements Study for 1959 (SM 129-56, 15 June 1956), declassified in 2015 " +
     "and held by the National Security Archive. It is a requirements study, not an approved war plan: " +
-    "the first SIOP was four years away. The scans carry no text layer, so every line was read twice, " +
+    "the first SIOP was four years away. Complexes come from Part I of the study, its unconstrained " +
+    "requirement. Airfields come from Part II, the desired-stockpile allocation, because Part I's airfield " +
+    "list was released only as an 11-page excerpt; of the 270 airfields printed in both, 265 carry the same " +
+    "priority. The scans carry no text layer, so every line was read twice, " +
     "independently, and disagreements were settled on an enlarged image; a blind audit of a 5 per cent " +
     "sample, 743 lines, found no transcription errors. Of the 2,343 transcribed entries 2,339 are drawn " +
     "here — four print no usable coordinate — and two complexes are missing from the published scan " +

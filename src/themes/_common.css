@@ -49,6 +49,15 @@ footer a { color: var(--muted); }
 .demo + .demo { margin-top: 20px; }
 @media (max-width: 520px) { .demo { padding: 20px 16px 18px !important; } }
 
+/* The hover readout shared by the turnout chart, the DebtRank ring and the commit heatmap. build.py
+   puts it straight under <body>, so its left/top are viewport coordinates as the scripts assume. */
+.tip {
+  position: fixed; pointer-events: none; z-index: 10; background: var(--ink); color: var(--bg);
+  font: 12.5px/1.45 var(--body); padding: 8px 10px; border-radius: 4px; max-width: 260px; box-shadow: 0 4px 14px rgba(0,0,0,.18);
+}
+.tip b { font-weight: 600; }
+.tip .m { font-family: var(--mono); font-size: 11.5px; opacity: .8; }
+
 .preview-bar { font: 13px/1.4 system-ui, sans-serif; background: #111; color: #ddd; padding: 8px 20px; display: flex; flex-wrap: wrap; gap: 6px 14px; }
 .preview-bar a { color: #9cf; }
 .preview-bar a[aria-current] { color: #fff; font-weight: 700; text-decoration: none; }

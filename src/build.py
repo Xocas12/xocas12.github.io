@@ -118,8 +118,13 @@ def sections(html):
 
 def page(name, title, theme, root, preview):
     body = rd(SRC / "pages" / ("home.html" if name == "index" else name + ".html"))
-    scripts = ""
+    scripts = tip = ""
     if name == "other":
+        # The hover readout three scripts share. It is position: fixed and placed at the pointer,
+        # so it lives outside <main>: inside a section, any transform or filter on the section
+        # (quiet's entry fade has both) makes that section its containing block, and the tip is
+        # drawn from the section's corner, which is off-screen by the time anyone scrolls down.
+        tip = '<div class="tip" id="cx-tip" hidden></div>\n'
         for slot, html, _, _ in DEMOS:
             body = body.replace("{{" + slot + "}}", rd(SRC / html))
         body = body.replace("{{ACTIVITY}}", rd(SRC / "activity.html"))
@@ -180,7 +185,7 @@ def page(name, title, theme, root, preview):
                  f'<link rel="stylesheet" href="{fonts.group(1)}">']
     return ("<!doctype html>\n<html lang=\"en\">\n<head>\n" + "\n".join(head) + f"\n<style>\n{css}\n</style>\n</head>\n"
             f'<body class="p-{name}">\n{bar}<div class="wrap">\n{header}<main>\n{body}\n</main>\n'
-            f'<footer>{footer}</footer>\n</div>\n{scripts}</body>\n</html>\n')
+            f'<footer>{footer}</footer>\n</div>\n{tip}{scripts}</body>\n</html>\n')
 
 
 def build(out, theme, root="", preview=False):

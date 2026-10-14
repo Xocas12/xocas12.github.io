@@ -1,8 +1,9 @@
 /* Galicia at 1 km: where eucalyptus grows against where it burned.
  *
  * Data: the Galicia payload, substituted at build time: {ny, nx, n, mask (RLE from a False run), euc, nat (base64, 4 bits a
- * cell over the masked cells in raster order), nd_nat (delta indices with no decoded value),
- * burn {i: delta indices of non-zero cells, v: 4-bit values, nd: delta indices of no-data}}.
+ * cell over the masked cells in raster order), burn {i: delta indices of non-zero cells, v: 4-bit
+ * values}}. Every layer has a value on every masked cell: make_galicia.py refuses to write a
+ * panel whose land mask differs from the eucalyptus one, and the build checks the payload.
  *
  * The grid is decoded from the figure the repository commits, not from a table, because the
  * repository commits no table. The decode was checked against the report's own hectares before
@@ -53,17 +54,9 @@
   var euc = unpack(D.euc);
   var nat = unpack(D.nat);
   var burn = new Float32Array(N);
-  var burnKnown = new Uint8Array(N).fill(1);
   (function () {
     var idx = undelta(D.burn.i);
     for (var i = 0; i < idx.length; i++) burn[idx[i]] = D.burn.v[i] / 15;
-    var nd = undelta(D.burn.nd);
-    for (var j = 0; j < nd.length; j++) burnKnown[nd[j]] = 0;
-  })();
-  var natKnown = new Uint8Array(N).fill(1);
-  (function () {
-    var nd = undelta(D.nd_nat);
-    for (var j = 0; j < nd.length; j++) natKnown[nd[j]] = 0;
   })();
 
   var mode = "both";
@@ -101,9 +94,9 @@
       if (mode === "euc" || mode === "both") {
         v = euc[i];
       } else if (mode === "nat") {
-        v = natKnown[i] ? nat[i] : 0;
+        v = nat[i];
       } else if (mode === "brn") {
-        v = burnKnown[i] ? Math.min(1, burn[i] * 3) : 0;
+        v = Math.min(1, burn[i] * 3);
         col = amber;
       }
       // A touch of gamma so the low fractions, which are most of Galicia, stay visible.
@@ -115,7 +108,7 @@
       // In the combined view a cell that burned is stamped amber over the green, so the two
       // distributions are in one frame. Comparing a picture to the memory of a picture is not
       // how you see that two things do not overlap.
-      if (mode === "both" && burnKnown[i] && burn[i] > 0) {
+      if (mode === "both" && burn[i] > 0) {
         var s = Math.min(1, 0.45 + burn[i] * 2.2);
         d[p] = d[p] + (amber[0] - d[p]) * s;
         d[p + 1] = d[p + 1] + (amber[1] - d[p + 1]) * s;
@@ -162,9 +155,9 @@
     }
     el.innerHTML =
       "eucalyptus <b>" + Math.round(euc[li] * 100) + "%</b> &middot; native broadleaf <b>" +
-      (natKnown[li] ? Math.round(nat[li] * 100) + "%" : "no value") +
+      Math.round(nat[li] * 100) + "%" +
       "</b> &middot; burnt 2018–2023 <b>" +
-      (burnKnown[li] ? (100 * burn[li]).toFixed(1) + "% of the period" : "no value") +
+      (100 * burn[li]).toFixed(1) + "% of the period" +
       "</b>";
   });
 
@@ -190,7 +183,6 @@
       var s = 0;
       var c = 0;
       for (var i = 0; i < N; i++) {
-        if (!burnKnown[i]) continue;
         if (euc[i] >= edges[b] && euc[i] < edges[b + 1]) {
           s += burn[i];
           c++;
@@ -259,7 +251,7 @@
     totN = 0;
   for (var i2 = 0; i2 < N; i2++) {
     totE += euc[i2];
-    if (natKnown[i2]) totN += nat[i2];
+    totN += nat[i2];
   }
   document.getElementById("gl-euc-ha").textContent = Math.round((totE * 100) / 1000);
   document.getElementById("gl-nat-ha").textContent = Math.round((totN * 100) / 1000);

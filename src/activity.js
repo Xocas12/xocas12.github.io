@@ -2,7 +2,7 @@
   const D = __ACTIVITY_DATA__; // { weeks: [{key, label}], rows: [{name, repos: [{name, counts: []}]}] }
   const grid = document.getElementById("act-grid"), tip = document.getElementById("cx-tip");
   const W = D.weeks.length;
-  grid.style.gridTemplateColumns = "max-content repeat(" + W + ", minmax(7px, 1fr))";
+  grid.style.gridTemplateColumns = "max-content repeat(" + W + ", minmax(0, 1fr))";
   const BINS = [[0, 0], [1, 3], [4, 9], [10, 24], [25, Infinity]];
   const MIX = [0, 28, 48, 70, 92];
   const colorFor = v => { const b = BINS.findIndex(([lo, hi]) => v >= lo && v <= hi); return b <= 0 ? "var(--surface-2)" : "color-mix(in oklab, var(--accent) " + MIX[b] + "%, var(--surface-2))"; };
@@ -27,13 +27,35 @@
     });
   });
   // month axis: label the first week of each month
-  const pad = document.createElement("div"); grid.appendChild(pad);
+  const pad = document.createElement("div"); pad.className = "act-pad"; grid.appendChild(pad);
+  const labels = [];
   let lastMonth = "";
   D.weeks.forEach(w => {
     const a = document.createElement("div"); a.className = "act-axis";
-    const m = w.month; if (m !== lastMonth) { a.textContent = m; lastMonth = m; }
+    const m = w.month; if (m !== lastMonth) { labels.push([a, m]); lastMonth = m; }
     grid.appendChild(a);
   });
+  // A label runs on over the weeks after its own. One that would run past the grid's right edge
+  // ('Oct' over a single October week) would widen the scroller and make a desktop grid scroll
+  // again, so that month stays unlabelled until it has room, as on GitHub's contribution graph.
+  // Measured rather than counted in columns: the column width depends on the theme and viewport.
+  const fitAxis = () => {
+    labels.forEach(([a, m]) => { a.textContent = m; });
+    const right = grid.getBoundingClientRect().right, r = document.createRange();
+    labels.filter(([a]) => { r.selectNodeContents(a); return r.getBoundingClientRect().right > right; })
+      .forEach(([a]) => { a.textContent = ""; });
+  };
+  // Where the grid is wider than its column (phones), open on the newest weeks, fade the left
+  // edge while older weeks are hidden, and stay on the newest weeks across a resize unless the
+  // reader has scrolled away from them.
+  const sc = grid.parentElement;
+  let atEnd = true;
+  const edge = () => { sc.classList.toggle("act-more-left", sc.scrollLeft > 0); atEnd = sc.scrollLeft >= sc.scrollWidth - sc.clientWidth - 1; };
+  const toEnd = () => { sc.scrollLeft = sc.scrollWidth; edge(); };
+  sc.addEventListener("scroll", edge, { passive: true });
+  window.addEventListener("resize", () => { fitAxis(); if (atEnd) toEnd(); else edge(); });
+  fitAxis();
+  toEnd();
   document.getElementById("act-total").innerHTML = "<b></b>commits since " + D.weeks[0].label;
   document.getElementById("act-total").querySelector("b").textContent = total.toLocaleString("en-US");
   const lg = document.getElementById("act-legend");

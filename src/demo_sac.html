@@ -22,6 +22,32 @@
   .sac-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
   @media (max-width: 640px) { .sac-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   .sac-stats .v.nm { font-size: 15px; letter-spacing: .01em; }
+  .sac-canvas:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .sac-find input {
+    font: 14px var(--body); color: var(--ink); background: var(--surface-2); border: 1px solid var(--line);
+    border-radius: 4px; padding: 7px 10px; width: min(320px, 78vw);
+  }
+  .sac-find input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .sac-find input[aria-invalid="true"] { border-color: var(--crit); }
+  .sac-btn {
+    font: 12.5px var(--mono); letter-spacing: .02em; color: var(--ink); background: var(--surface-2);
+    border: 1px solid var(--line); border-radius: 4px; padding: 5px 10px; cursor: pointer;
+  }
+  .sac-btn:hover { border-color: var(--accent); }
+  .sac-btn[aria-pressed="true"] { box-shadow: inset 0 -2px 0 var(--accent); }
+  .sac-btn .t { color: var(--muted); }
+  @media (pointer: coarse) { .sac-btn { padding: 7px 11px; } }
+  .sac-step, .sac-also { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; font: 12px var(--mono); color: var(--muted); }
+  .sac-also[hidden] { display: none; }
+  .sac-legend .sac-how-touch { display: none; }
+  @media (hover: none) {
+    .sac-legend .sac-how-hover { display: none; }
+    .sac-legend .sac-how-touch { display: inline-flex; }
+  }
+  .sac-sr {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
 </style>
 
 <div class="demo" id="sac56">
@@ -48,19 +74,32 @@
       <input type="range" id="sac-depth" min="1" max="1223" step="1" value="1223">
       <span class="val" id="sac-depth-val">all tiers</span>
     </div>
+    <div class="ctl sac-find">
+      <label for="sac-find">Find an entry by name</label>
+      <input type="text" id="sac-find" list="sac-names" autocomplete="off" spellcheck="false" placeholder="e.g. Novosibirsk">
+      <datalist id="sac-names"></datalist>
+    </div>
   </div>
   <div class="sac-wrap">
-    <canvas class="sac-canvas" id="sac-canvas" role="img" aria-label="Map of 2,339 targets from the 1956 Strategic Air Command study, plotted as points with no basemap, coloured by whether the entry is an urban-industrial complex or an airfield."></canvas>
+    <canvas class="sac-canvas" id="sac-canvas" role="img" tabindex="0" aria-keyshortcuts="ArrowLeft ArrowRight Home End" aria-label="Map of 2,339 targets from the 1956 Strategic Air Command study, plotted as points with no basemap, coloured by whether the entry is an urban-industrial complex or an airfield."></canvas>
+    <p class="sac-sr" id="sac-live" aria-live="polite"></p>
   </div>
   <div class="sac-legend">
     <span><i style="background:var(--accent)"></i> urban-industrial complex</span>
     <span><i style="background:var(--teal)"></i> airfield</span>
-    <span class="m">hover the map to read an entry</span>
+    <span class="m sac-how-hover">hover or tap the map to read an entry (click to hold it), search by name, or step with Previous and Next</span>
+    <span class="m sac-how-touch">tap the map to read an entry, search by name, or step with Previous and Next</span>
   </div>
   <div class="sac-src">
+    <div class="sac-step">
+      <button type="button" class="sac-btn" id="sac-prev">Previous</button>
+      <button type="button" class="sac-btn" id="sac-next">Next</button>
+      <span id="sac-pos"></span>
+    </div>
     <div class="who" id="sac-who"><b>Moscow</b> — USSR, urban-industrial complex</div>
     <div class="ln" id="sac-line">1 5150 MOSCOW 5545-03737</div>
     <div class="meta" id="sac-meta"></div>
+    <div class="sac-also" id="sac-also" hidden></div>
   </div>
   <div class="sac-stats">
     <div class="stat"><div class="k">Targets shown</div><div class="v" id="sac-n">0</div><div class="s">of 2,339 plotted</div></div>

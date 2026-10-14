@@ -132,10 +132,10 @@
       mode === "brn"
         ? "<span><i style='background:" + hex("--crit", "#B8322C") + "'></i>share of 2018–2023 burnt</span>"
         : mode === "both"
-          ? "<span><i style='background:" + hex("--teal", "#2E6E5E") + "'></i>eucalyptus fraction</span>" +
+          ? "<span><i style='background:" + hex("--teal", "#2E6E5E") + "'></i>eucalyptus fraction, 2017</span>" +
             "<span><i style='background:" + hex("--crit", "#B8322C") + "'></i>burnt 2018–2023</span>"
           : "<span><i style='background:" + hex("--teal", "#2E6E5E") + "'></i>" +
-            (mode === "nat" ? "native broadleaf fraction" : "eucalyptus fraction") + "</span>";
+            (mode === "nat" ? "native broadleaf fraction" : "eucalyptus fraction, 2017") + "</span>";
   }
 
   // cell lookup for hover: raster index -> land index
@@ -198,7 +198,7 @@
       B = 34;
     var max = Math.max.apply(null, bins.map(function (x) { return x.v; })) * 1.12;
     var bw = (W - L - R) / bins.length;
-    var p = ['<text class="ttl" x="0" y="12">WHAT THE MAP SHOWS</text>'];
+    var p = ['<text class="ttl" x="0" y="12">WHAT THE MAP SHOWS (2017 MAP)</text>'];
     bins.forEach(function (x, i) {
       var h = ((H - T - B) * x.v) / max;
       p.push('<rect class="bar" x="' + (L + i * bw + 3) + '" y="' + (H - B - h) +
@@ -256,12 +256,27 @@
   document.getElementById("gl-euc-ha").textContent = Math.round((totE * 100) / 1000);
   document.getElementById("gl-nat-ha").textContent = Math.round((totN * 100) / 1000);
 
+  // The burnt-cell figures (10.3, 5.6), the "about a point" elsewhere and the ratios (0.60,
+  // 0.17) are measured and checked by make_galicia.py (NOTE_BURNT_EUC, NOTE_RATIO); change them
+  // there first.
   document.getElementById("gl-note").textContent =
-    "Model output, not a survey. The species map is trained on cleaned OpenStreetMap labels, " +
-    "eucalyptus pseudo-labels from clear-cut history and the 1998 Mapa Forestal de España; held " +
-    "out from the northern block it scores F1 0.77 for 2024, but against 6,903 national-inventory " +
-    "plots the plot-by-plot agreement is F1 0.45, and the totals match better than the cells do " +
-    "(the map calls 30.4 per cent of wooded plots eucalyptus, the plots list 27.5 per cent). The " +
+    "Model output, not a survey. The cover map is the project's 2017 map, made from imagery taken " +
+    "before the fires, and the one its estimates use. The species model is trained on cleaned " +
+    "OpenStreetMap labels, eucalyptus pseudo-labels from clear-cut history and the 1998 Mapa " +
+    "Forestal de España; held out from the northern block it scores F1 0.68 for 2017 and 0.77 for " +
+    "2024, but against 6,903 national-inventory plots the plot-by-plot agreement is F1 0.44 and 0.45 " +
+    "respectively, and the totals match better than the cells do (the 2024 map calls 30.4 per cent " +
+    "of wooded plots eucalyptus, the plots list 27.5 per cent). Nine pixels in ten of the 2017 map " +
+    "are the 2024 class carried back where nothing happened in between; where a clear-cut or a fire " +
+    "was recorded, and so on every burnt pixel, it is the same model run on 2017 imagery, which is " +
+    "weaker (one satellite, fewer clear winter scenes): eucalyptus precision against the Mapa " +
+    "Forestal is 0.31 for that classification and 0.47 for 2024. The 2024 map, made after the " +
+    "fires, finds about half as much eucalyptus in the cells that burned (5.6 per cent of the cell " +
+    "on average, against 10.3 on the 2017 map; in the other cells the averages differ by about a " +
+    "point), and on it the burnt share falls far more steeply with eucalyptus. Inventory plots, " +
+    "which need no map, fall between the two: those with eucalyptus burned 0.14 per cent a year and " +
+    "the rest 0.38, a ratio of 0.37, where weighting each cell's burnt share by its eucalyptus and " +
+    "by everything else gives 0.60 on the 2017 map and 0.17 on the 2024 one. The " +
     "grid itself was read back off the figure the repository publishes, because the repository " +
     "commits the figure and not the table; the recovered area comes within 0.2 per cent of the " +
     "hectares the report states. The binned bars are a correlation I computed from that grid, not " +

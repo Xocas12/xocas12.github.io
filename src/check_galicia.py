@@ -1,11 +1,16 @@
 """Does galicia.json give every layer a value on every land cell, as demo_galicia.js assumes?
 
 Each panel of the figure draws the same 29,565 cells, so a correct decode has no gaps, and
-make_galicia.py refuses to write a panel whose land mask differs from the eucalyptus-2024 one.
+make_galicia.py refuses to write a panel whose land mask differs from the eucalyptus one.
 The payload used to carry no-data lists (`nd_nat`, `burn.nd`, 625 and 403 cells). They were not
 colour failures: two panel origins were a whole cell out, and the lists were the cells the shift
 pushed off the coast. The page no longer reads such lists, so it would draw those cells as if
 they had values; this refuses the payload instead, and checks the indexing the page relies on.
+
+It also checks that the eucalyptus layer is the 2017 map, which is what the page calls it. The
+2024 map is made after the 2018-2023 fires and finds about half as much eucalyptus where they
+burned, so a payload built from it would set the fires against their own aftermath. The two maps
+are 8 per cent apart in total area, which is enough to tell them apart from the payload alone.
 Standard library only, because the build installs nothing.
 """
 
@@ -14,6 +19,12 @@ from __future__ import annotations
 import base64
 import binascii
 import json
+
+#: informe.md, the 2017 eucalyptus area (482,702 ha on the map; the 2024 map has 442,209). The
+#: page packs each cell to 4 bits, which costs about 1 per cent of the area, so the tolerance is
+#: 2 per cent: wide enough for the packing, a quarter of the gap to the 2024 map.
+EUC_2017_HA = 482_702
+EUC_HA_TOL = 0.02
 
 
 def check(payload_text: str) -> list[str]:
@@ -45,12 +56,21 @@ def check(payload_text: str) -> list[str]:
 
     for layer in ("euc", "nat"):
         try:
-            size = len(base64.b64decode(d[layer], validate=True))
+            packed = base64.b64decode(d[layer], validate=True)
         except binascii.Error as exc:
             problems.append(f"{layer} is not base64: {exc}")
             continue
-        if size != (n + 1) // 2:
-            problems.append(f"{layer} packs {size} bytes, {n} cells at 4 bits need {(n + 1) // 2}")
+        if len(packed) != (n + 1) // 2:
+            problems.append(f"{layer} packs {len(packed)} bytes, {n} cells at 4 bits need {(n + 1) // 2}")
+            continue
+        if layer == "euc":
+            # Every cell is 1 km2 = 100 ha; a level of 15 is the whole cell. The pad nibble is 0.
+            ha = sum((b >> 4) + (b & 15) for b in packed) / 15 * 100
+            if abs(ha / EUC_2017_HA - 1) > EUC_HA_TOL:
+                problems.append(
+                    f"euc sums to {ha:,.0f} ha; the page labels it the 2017 map, which has "
+                    f"{EUC_2017_HA:,} ha (limit {EUC_HA_TOL:.0%}). Built from the 2024 panel?"
+                )
 
     deltas, levels = d["burn"]["i"], d["burn"]["v"]
     if len(deltas) != len(levels):

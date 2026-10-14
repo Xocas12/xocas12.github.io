@@ -25,9 +25,11 @@
 <div class="demo" id="galicia">
   <h3>Where it grows is not where it burns</h3>
   <p class="lede">
-    Galicia at one square kilometre, 29,565 cells. Eucalyptus is a dense band hugging the Atlantic coast and
-    the north; the fires of 2018–2023 fall in the drier interior, and the two barely overlap. Bin the cells by
-    eucalyptus fraction and the burnt share falls almost monotonically, 4.6 per cent down to 0.1. That is not
+    Galicia at one square kilometre, 29,565 cells, with eucalyptus as the project mapped it for 2017, before
+    the fires. Eucalyptus is a dense band hugging the Atlantic coast and the north; the fires of 2018–2023 fall
+    in the drier interior. Bin the cells by eucalyptus fraction and the burnt share does not fall at first:
+    3.1 per cent where there is almost none, 4.3 at 5–10 per cent, then 3.7, 2.3 and 1.9 up to half the cell.
+    Only cells that are mostly eucalyptus burn much less, 1.4 and 0.5. That is not
     an effect — plantations sit on the wet, mild coast, which differs from the interior in a dozen ways besides
     eucalyptus. The right-hand panel is what the project gets once terrain, location, human pressure, weather
     and the other covers are held fixed, and the comparison you choose decides the sign.
@@ -37,7 +39,7 @@
       <span class="ctl-label" id="gl-mode-label">Layer</span>
       <div class="seg" role="group" aria-labelledby="gl-mode-label">
         <button type="button" id="gl-both" aria-pressed="true">Eucalyptus + fire</button>
-        <button type="button" id="gl-euc" aria-pressed="false">Eucalyptus 2024</button>
+        <button type="button" id="gl-euc" aria-pressed="false">Eucalyptus 2017</button>
         <button type="button" id="gl-nat" aria-pressed="false">Native broadleaf</button>
         <button type="button" id="gl-brn" aria-pressed="false">Burnt 2018–2023</button>
       </div>
@@ -45,7 +47,7 @@
   </div>
   <div class="gl-grid">
     <div>
-      <canvas class="gl-canvas" id="gl-canvas" role="img" aria-label="Map of Galicia at one square kilometre showing eucalyptus fraction as a green fill with burnt cells marked in orange."></canvas>
+      <canvas class="gl-canvas" id="gl-canvas" role="img" aria-label="Map of Galicia at one square kilometre showing the 2017 eucalyptus fraction as a green fill with burnt cells marked in orange."></canvas>
       <div class="gl-legend" id="gl-legend"></div>
       <p class="gl-read" id="gl-read">Hover a cell.</p>
     </div>
@@ -55,7 +57,7 @@
     </div>
   </div>
   <div class="gl-stats">
-    <div class="stat"><div class="k">Eucalyptus 2024</div><div class="v" id="gl-euc-ha">0</div><div class="s">thousand ha mapped</div></div>
+    <div class="stat"><div class="k">Eucalyptus 2017</div><div class="v" id="gl-euc-ha">0</div><div class="s">thousand ha mapped</div></div>
     <div class="stat"><div class="k">Native broadleaf</div><div class="v" id="gl-nat-ha">0</div><div class="s">thousand ha mapped</div></div>
     <div class="stat"><div class="k">Cells</div><div class="v">29,565</div><div class="s">one square kilometre each</div></div>
     <div class="stat"><div class="k">Robustness value</div><div class="v">0.017</div><div class="s">erases the fire estimate</div></div>

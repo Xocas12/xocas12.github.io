@@ -2,7 +2,7 @@
   const D = __ACTIVITY_DATA__; // { weeks: [{key, label}], rows: [{name, repos: [{name, counts: []}]}] }
   const grid = document.getElementById("act-grid"), tip = document.getElementById("cx-tip");
   const W = D.weeks.length;
-  grid.style.gridTemplateColumns = "max-content repeat(" + W + ", minmax(7px, 1fr))";
+  grid.style.gridTemplateColumns = "max-content repeat(" + W + ", minmax(0, 1fr))";
   const BINS = [[0, 0], [1, 3], [4, 9], [10, 24], [25, Infinity]];
   const MIX = [0, 28, 48, 70, 92];
   const colorFor = v => { const b = BINS.findIndex(([lo, hi]) => v >= lo && v <= hi); return b <= 0 ? "var(--surface-2)" : "color-mix(in oklab, var(--accent) " + MIX[b] + "%, var(--surface-2))"; };
@@ -27,13 +27,23 @@
     });
   });
   // month axis: label the first week of each month
-  const pad = document.createElement("div"); grid.appendChild(pad);
+  const pad = document.createElement("div"); pad.className = "act-pad"; grid.appendChild(pad);
   let lastMonth = "";
   D.weeks.forEach(w => {
     const a = document.createElement("div"); a.className = "act-axis";
     const m = w.month; if (m !== lastMonth) { a.textContent = m; lastMonth = m; }
     grid.appendChild(a);
   });
+  // Where the grid is wider than its column (phones), open on the newest weeks, fade the left
+  // edge while older weeks are hidden, and stay on the newest weeks across a resize unless the
+  // reader has scrolled away from them.
+  const sc = grid.parentElement;
+  let atEnd = true;
+  const edge = () => { sc.classList.toggle("act-more-left", sc.scrollLeft > 0); atEnd = sc.scrollLeft >= sc.scrollWidth - sc.clientWidth - 1; };
+  const toEnd = () => { sc.scrollLeft = sc.scrollWidth; edge(); };
+  sc.addEventListener("scroll", edge, { passive: true });
+  window.addEventListener("resize", () => { if (atEnd) toEnd(); else edge(); });
+  toEnd();
   document.getElementById("act-total").innerHTML = "<b></b>commits since " + D.weeks[0].label;
   document.getElementById("act-total").querySelector("b").textContent = total.toLocaleString("en-US");
   const lg = document.getElementById("act-legend");

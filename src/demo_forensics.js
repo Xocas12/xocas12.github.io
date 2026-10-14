@@ -3,8 +3,10 @@
   const $ = id => document.getElementById(id);
   const svg = $("fz-chart"), tip = $("cx-tip"), NS = "http://www.w3.org/2000/svg";
   const LO = 300, HI = 1000;            // bins 30.0 .. 99.9 (index = tenths of a point)
-  const W = 900, H = 280, PL = 46, PR = 10, PT = 14, PB = 30;
-  const bw = (W - PL - PR) / (HI - LO);
+  // Laid out in CSS pixels at the width the chart is drawn (chart_px.js), so FS is the text size
+  // on screen. draw() sets W, H, the left margin and the bin width.
+  const FS = 11, PR = 10, PT = 22, PB = 30;
+  let W = 900, H = 280, PL = 46, bw = 1;
   const fmt = v => Math.round(v).toLocaleString("en-US");
 
   // ---- simulation: psephos's honest generator, plus officials who report a round target ----
@@ -53,16 +55,24 @@
   const x = b => PL + (b - LO) * bw, y = v => PT + (H - PT - PB) * (1 - Math.min(v, yMax) / yMax);
   function draw(d) {
     cur = d;
+    // A phone-width chart keeps more height than its share of the width, so the spikes have room.
+    const box = ChartPx.fit(svg, w => Math.max(190, w * 0.31));
+    W = box.w; H = box.h;
     while (svg.lastChild && svg.lastChild.tagName !== "title") svg.removeChild(svg.lastChild);
     const vals = d.obs.slice(LO, HI);
     const peak = Math.max.apply(null, vals);
     yMax = Math.ceil(peak / 100) * 100 || 100;
+    PL = Math.ceil(ChartPx.textW(fmt(yMax), FS)) + 12;
+    bw = (W - PL - PR) / (HI - LO);
     const ax = el("g", { class: "axis" }, svg);
     for (let t = 0; t <= yMax; t += yMax / 4) {
       el("line", { x1: PL, x2: W - PR, y1: y(t), y2: y(t), class: "grid" }, ax);
       el("text", { x: PL - 8, y: y(t) + 4, "text-anchor": "end" }, ax).textContent = fmt(t);
     }
-    for (let p = 30; p <= 100; p += 10) {
+    // Every ten points where the labels fit, every twenty where they would touch. The tightest
+    // gap is the last: half of "90%", then all of "100%", which ends at the axis.
+    const step = (W - PL - PR) / 7 < ChartPx.textW("90%", FS) / 2 + ChartPx.textW("100%", FS) + 6 ? 20 : 10;
+    for (let p = 30; p <= 100; p += step) {
       const t = el("text", { x: x(p * 10) , y: H - 10, "text-anchor": p === 100 ? "end" : "middle" }, ax);
       t.textContent = p + "%";
     }
@@ -80,11 +90,16 @@
     // label the three largest integer spikes above expectation
     const spikes = [];
     for (let b = LO; b < HI; b += 10) spikes.push([d.obs[b] - d.exp[b], b]);
-    spikes.sort((a, b) => b[0] - a[0]).slice(0, 3).forEach(([ex, b]) => {
-      if (ex < 25) return;
+    const labelled = spikes.sort((a, b) => b[0] - a[0]).slice(0, 3).filter(([ex]) => ex >= 25);
+    labelled.forEach(([, b]) => {
       const t = el("text", { x: x(b) + bw / 2, y: y(d.obs[b]) - 6, "text-anchor": b > 960 ? "end" : "middle", class: "peak" }, svg);
       t.textContent = (b / 10).toFixed(0) + "%";
     });
+    // The same spikes as text under the chart, which reads at any width.
+    $("fz-spikes").textContent = labelled.length
+      ? labelled.sort((a, b) => b[1] - a[1]).map(([, b], i) =>
+        (b / 10).toFixed(0) + "%: " + fmt(d.obs[b]) + (i ? " vs " : " precincts vs ") + fmt(d.exp[b]) + (i ? "" : " expected")).join("; ")
+      : "No whole-percent bin is 25 or more precincts above what chance predicts.";
     const cross = el("line", { class: "cross", y1: PT, y2: H - PB, x1: -10, x2: -10 }, svg);
     const hit = el("rect", { x: PL, y: PT, width: W - PL - PR, height: H - PT - PB, fill: "transparent" }, svg);
     hit.addEventListener("mousemove", e => {
@@ -132,4 +147,5 @@
   $("fz-sim").addEventListener("click", () => show("sim"));
   $("fz-cheat").addEventListener("input", () => show("sim"));
   show("2018");
+  ChartPx.watch(svg, () => { if (cur) draw(cur); });
 })();

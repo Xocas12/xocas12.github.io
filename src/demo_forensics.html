@@ -14,6 +14,7 @@
   .fz-chart .exp { fill: none; stroke: var(--teal); stroke-width: 2; stroke-linejoin: round; }
   .fz-chart .cross { stroke: var(--ink); stroke-width: 1; stroke-dasharray: 3 3; }
   .fz-chart .peak { font-family: var(--mono); font-size: 11px; fill: var(--ink); paint-order: stroke; stroke: var(--surface); stroke-width: 4px; }
+  .fz-spikes { margin: -8px 0 0; font: 12px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
   .fz-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
   @media (max-width: 640px) { .fz-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   .pill.flag { background: var(--crit-bg); color: var(--crit); }
@@ -46,6 +47,7 @@
   <svg class="fz-chart" id="fz-chart" viewBox="0 0 900 280" role="img" aria-labelledby="fz-chart-title">
     <title id="fz-chart-title">Histogram of precinct turnout in 0.1-point bins, with integer-percentage bins highlighted and the expected count under binomial noise as a line.</title>
   </svg>
+  <p class="fz-spikes" id="fz-spikes"></p>
   <div class="fz-stats">
     <div class="stat"><div class="k">On a whole percent</div><div class="v" id="fz-obs">0</div><div class="s">precincts within 0.05 points</div></div>
     <div class="stat"><div class="k">Expected by chance</div><div class="v" id="fz-exp">0</div><div class="s" id="fz-sd"></div></div>

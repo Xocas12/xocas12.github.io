@@ -40,12 +40,25 @@
 
   function drawHist() {
     var c = D.cells[sel];
-    var W = 900,
-      H = 260,
-      L = 54,
+    // Laid out in CSS pixels at the width the chart is drawn (chart_px.js), so the stylesheet's
+    // 11px is the text size on screen. On a narrow chart the title and caption take two lines.
+    var title = [];
+    var cap = [];
+    var T = 0;
+    var PLOT = 125;
+    var dims = ChartPx.fit(host, function (w) {
+      title = ChartPx.lines(["REPORTED FULFILMENT RATIO,", "NOTCH WIDTH " + (c.w === 0 ? "0 (SHARP)" : c.w)],
+        11.5, w - 4, 0.06);
+      cap = ChartPx.lines(["reported / planned, bins of " + D.w, "bar height is the square root of the count"],
+        11, w - 4, 0, " · ");
+      T = 13 + 15 * (title.length - 1) + 21;
+      return T + PLOT + 37 + 15 * (cap.length - 1);
+    });
+    var W = dims.w,
+      H = dims.h,
+      L = 60,
       R = 56,
-      T = 30,
-      B = 40;
+      B = H - T - PLOT;
     var n = c.c.length;
     var bw = (W - L - R) / n;
     var max = 0;
@@ -56,8 +69,9 @@
     var xAt = function (i) { return L + i * bw; };
     var rho = function (i) { return D.lo + (c.i0 + i + 0.5) * D.w; };
 
-    var p = ['<text class="ttl" x="0" y="13">REPORTED FULFILMENT RATIO, NOTCH WIDTH ' +
-      (c.w === 0 ? "0 (SHARP)" : c.w) + "</text>"];
+    var p = title.map(function (line, i) {
+      return '<text class="ttl" x="0" y="' + (13 + 15 * i) + '">' + line + "</text>";
+    });
     for (var i = 0; i < n; i++) {
       if (!c.c[i]) continue;
       p.push('<rect class="bar' + (i === pk ? " pk" : "") + '" x="' + xAt(i).toFixed(1) +
@@ -72,10 +86,10 @@
     // The peak, called out where it actually sits. Offset to whichever side has room, because
     // the tallest bar reaches the top of the plot and the "plan = 1.00" label lives up there.
     var px = xAt(pk) + bw / 2;
-    var right = px < W - R - 150;
+    var callout = c.peak.toFixed(2) + "% at " + c.peakRho.toFixed(3);
+    var right = px + 10 + ChartPx.textW(callout, 11) <= W - 4;
     p.push('<text class="lbl" x="' + (px + (right ? 10 : -10)).toFixed(1) + '" y="' + (T + 14) +
-      '" text-anchor="' + (right ? "start" : "end") + '">' + c.peak.toFixed(2) + "% at " +
-      c.peakRho.toFixed(3) + "</text>");
+      '" text-anchor="' + (right ? "start" : "end") + '">' + callout + "</text>");
     p.push('<line class="ax" x1="' + L + '" y1="' + (H - B) + '" x2="' + (W - R) + '" y2="' + (H - B) + '"></line>');
     for (var t = 0; t <= 4; t++) {
       var v = rho(0) + (t / 4) * (n * D.w);
@@ -84,20 +98,20 @@
     }
     // overflow stubs, labelled: dropping them silently would be a lie about where the mass is
     if (c.below) {
-      p.push('<rect class="stub" x="' + (L - 26) + '" y="' + (H - B - 34) + '" width="18" height="34"></rect>');
-      p.push('<text x="' + (L - 17) + '" y="' + (H - B + 14) + '" text-anchor="middle">&lt;</text>');
-      p.push('<text x="' + (L - 17) + '" y="' + (H - B - 40) + '" text-anchor="middle">' +
+      p.push('<rect class="stub" x="' + (L - 32) + '" y="' + (H - B - 34) + '" width="18" height="34"></rect>');
+      p.push('<text x="' + (L - 23) + '" y="' + (H - B + 14) + '" text-anchor="middle">&lt;</text>');
+      p.push('<text x="' + (L - 23) + '" y="' + (H - B - 40) + '" text-anchor="middle">' +
         c.below.toLocaleString("en-GB") + "</text>");
     }
     if (c.above) {
-      p.push('<rect class="stub" x="' + (W - R + 8) + '" y="' + (H - B - 34) + '" width="18" height="34"></rect>');
-      p.push('<text x="' + (W - R + 17) + '" y="' + (H - B + 14) + '" text-anchor="middle">&gt;</text>');
-      p.push('<text x="' + (W - R + 17) + '" y="' + (H - B - 40) + '" text-anchor="middle">' +
+      p.push('<rect class="stub" x="' + (W - R + 14) + '" y="' + (H - B - 34) + '" width="18" height="34"></rect>');
+      p.push('<text x="' + (W - R + 23) + '" y="' + (H - B + 14) + '" text-anchor="middle">&gt;</text>');
+      p.push('<text x="' + (W - R + 23) + '" y="' + (H - B - 40) + '" text-anchor="middle">' +
         c.above.toLocaleString("en-GB") + "</text>");
     }
-    p.push('<text x="' + (W / 2) + '" y="' + (H - 6) +
-      '" text-anchor="middle">reported / planned, bins of ' + D.w +
-      ' &middot; bar height is the square root of the count</text>');
+    cap.forEach(function (line, i) {
+      p.push('<text x="' + W / 2 + '" y="' + (H - B + 31 + 15 * i) + '" text-anchor="middle">' + line + "</text>");
+    });
     host.innerHTML = p.join("");
 
     document.getElementById("gp-peak").textContent = c.peak.toFixed(2) + "%";
@@ -107,13 +121,26 @@
   }
 
   function drawSeeds() {
-    var W = 900,
-      H = 150,
-      L = 100,
-      R = 30,
-      T = 26;
+    // CSS pixels, as in drawHist.
+    var svg = document.getElementById("gp-seeds");
+    var title = [];
+    var cap = [];
+    var T = 0;
+    var L = Math.ceil(ChartPx.textW("notched", 11)) + 14,
+      R = 30;
+    var dims = ChartPx.fit(svg, function (w) {
+      title = ChartPx.lines(["EVERY RUN,", "NOT THE AVERAGE OF THEM"], 11.5, w - 4, 0.06);
+      // centred under the axis rather than the chart, so it has w - (L - R) to fit in
+      cap = ChartPx.lines(["share of that run's reports", "inside the bonus window"], 11, w - (L - R) - 4);
+      T = 13 + 15 * (title.length - 1) + 21;
+      return T + 90 + 34 + 15 * (cap.length - 1) + 6;
+    });
+    var W = dims.w,
+      RULE = T + 90; // the threshold rule runs from T to here, below the second row
     var x = function (v) { return L + v * (W - L - R); };
-    var p = ['<text class="ttl" x="0" y="13">EVERY RUN, NOT THE AVERAGE OF THEM</text>'];
+    var p = title.map(function (line, i) {
+      return '<text class="ttl" x="0" y="' + (13 + 15 * i) + '">' + line + "</text>";
+    });
     ["notched", "smooth"].forEach(function (arm, r) {
       var y = T + 26 + r * 44;
       p.push('<text x="0" y="' + (y + 4) + '">' + arm + "</text>");
@@ -125,15 +152,17 @@
       });
     });
     p.push('<line class="rule" x1="' + x(D.thresh) + '" y1="' + T + '" x2="' + x(D.thresh) +
-      '" y2="' + (H - 32) + '"></line>');
+      '" y2="' + RULE + '"></line>');
     p.push('<text x="' + x(D.thresh) + '" y="' + (T - 4) + '" text-anchor="middle">threshold 0.44</text>');
     for (var t = 0; t <= 4; t++) {
-      p.push('<text x="' + x(t / 4) + '" y="' + (H - 14) + '" text-anchor="middle">' +
+      p.push('<text x="' + x(t / 4) + '" y="' + (RULE + 18) + '" text-anchor="middle">' +
         (t / 4).toFixed(2) + "</text>");
     }
-    p.push('<text x="' + ((L + W - R) / 2) + '" y="' + (H - 1) +
-      '" text-anchor="middle">share of that run\'s reports inside the bonus window</text>');
-    document.getElementById("gp-seeds").innerHTML = p.join("");
+    cap.forEach(function (line, i) {
+      p.push('<text x="' + ((L + W - R) / 2) + '" y="' + (RULE + 34 + 15 * i) + '" text-anchor="middle">' +
+        line + "</text>");
+    });
+    svg.innerHTML = p.join("");
   }
 
   document.getElementById("gp-note").textContent =
@@ -154,4 +183,6 @@
 
   drawHist();
   drawSeeds();
+  ChartPx.watch(host, drawHist);
+  ChartPx.watch(document.getElementById("gp-seeds"), drawSeeds);
 })();

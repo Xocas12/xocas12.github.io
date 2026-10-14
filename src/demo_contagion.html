@@ -25,13 +25,17 @@
   .ring .node { cursor: pointer; stroke: var(--surface); stroke-width: 2; }
   .ring .node:focus-visible { outline: none; stroke: var(--accent); stroke-width: 3; }
   .ring .node.seed { stroke: var(--ink); stroke-width: 2.5; }
+  /* Ring text is sized in ring units, not CSS px. The labels sit at fixed points on the ring, so
+     whether they collide does not depend on how wide it is drawn; at these sizes none touches
+     another label or a node for any failing bank at 5, 35 or 100%. The viewBox is cropped to
+     what gets drawn (x 32-518, y 50-504 over the same runs), so no width goes on empty margin. */
   .ring text { font-family: var(--mono); font-size: 12.5px; fill: var(--muted); }
   .ring text.hit { fill: var(--ink); font-weight: 600; }
   .ring .edge { stroke: var(--accent); fill: none; }
-  .ring .region { font-size: 10px; letter-spacing: .14em; fill: var(--faint); }
+  .ring .region { font-size: 11px; letter-spacing: .14em; fill: var(--faint); }
   .ring .halo { paint-order: stroke; stroke: var(--surface); stroke-width: 5px; stroke-linejoin: round; }
   .ring .center-num { font-family: var(--display); font-size: 30px; fill: var(--ink); }
-  .ring .center-cap { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; fill: var(--faint); }
+  .ring .center-cap { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; fill: var(--faint); }
   .readout { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
   .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
   .stat { border-top: 1px solid var(--line); padding-top: 8px; }
@@ -80,7 +84,7 @@
   </div>
   <div class="rho" id="cx-rho"></div>
   <div class="demo-grid">
-    <svg class="ring" id="cx-ring" viewBox="0 0 560 560" role="img" aria-labelledby="cx-ring-title">
+    <svg class="ring" id="cx-ring" viewBox="28 46 494 462" role="img" aria-labelledby="cx-ring-title">
       <title id="cx-ring-title">Ring of the 29 G-SIBs. Circle size is CET1 capital, color is the share of capital lost.</title>
     </svg>
     <div class="readout">

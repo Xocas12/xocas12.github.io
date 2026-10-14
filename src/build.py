@@ -4,7 +4,8 @@
     python src/build.py OUTDIR --theme mono     # the site, in another theme
     python src/build.py OUTDIR --previews       # also OUTDIR/preview/<theme>/ for every theme
 
-The demos (src/demo_*.{html,js}) and the commit heatmap (src/activity.*) go on the Other page.
+The demos (src/demo_*.{html,js}) and the commit heatmap (src/activity.*) go on the Other page,
+after src/chart_px.js, which the demo charts use to set their text in CSS pixels.
 """
 import json
 
@@ -123,7 +124,7 @@ def page(name, title, theme, root, preview):
         for slot, html, _, _ in DEMOS:
             body = body.replace("{{" + slot + "}}", rd(SRC / html))
         body = body.replace("{{ACTIVITY}}", rd(SRC / "activity.html"))
-        js = []
+        js = [rd(SRC / "chart_px.js")]  # shared by the demo charts, so it goes first
         for _, _, src_js, (placeholder, data) in DEMOS:
             text = rd(SRC / src_js)
             # Exactly once. str.replace() substitutes every occurrence, so a placeholder named

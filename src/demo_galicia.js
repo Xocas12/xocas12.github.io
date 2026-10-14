@@ -198,28 +198,38 @@
       }
       bins.push({ lo: edges[b], hi: edges[b + 1], n: c, v: c ? s / c : 0 });
     }
-    var W = 420,
-      H = 190,
-      L = 42,
-      R = 10,
-      T = 26,
-      B = 34;
+    // In CSS pixels at the width the chart is drawn (chart_px.js), so the stylesheet's 11px is
+    // the text size on screen whatever the width of the column.
+    var svg = document.getElementById("gl-bins");
+    var cap = [];
+    var L = 4,
+      R = 4,
+      T = 42,
+      PLOT = 100;
+    var dims = ChartPx.fit(svg, function (w) {
+      cap = ChartPx.lines(["eucalyptus fraction", "of the cell, %"], 11, w - 4);
+      return T + PLOT + 37 + 15 * (cap.length - 1);
+    });
+    var W = dims.w,
+      H = dims.h,
+      B = H - T - PLOT;
     var max = Math.max.apply(null, bins.map(function (x) { return x.v; })) * 1.12;
     var bw = (W - L - R) / bins.length;
-    var p = ['<text class="ttl" x="0" y="12">WHAT THE MAP SHOWS</text>'];
+    var p = ['<text class="ttl" x="1" y="13">WHAT THE MAP SHOWS</text>'];
     bins.forEach(function (x, i) {
       var h = ((H - T - B) * x.v) / max;
       p.push('<rect class="bar" x="' + (L + i * bw + 3) + '" y="' + (H - B - h) +
         '" width="' + (bw - 6) + '" height="' + h + '"></rect>');
-      p.push('<text x="' + (L + i * bw + bw / 2) + '" y="' + (H - B + 12) +
+      p.push('<text x="' + (L + i * bw + bw / 2) + '" y="' + (H - B + 14) +
         '" text-anchor="middle">' + Math.round(x.lo * 100) + "</text>");
       p.push('<text x="' + (L + i * bw + bw / 2) + '" y="' + (H - B - h - 4) +
         '" text-anchor="middle">' + (100 * x.v).toFixed(1) + "</text>");
     });
-    p.push('<text x="' + (L + (W - L - R) / 2) + '" y="' + (H - 6) +
-      '" text-anchor="middle">eucalyptus fraction of the cell, %</text>');
-    p.push('<text x="0" y="' + (T + 4) + '">% burnt</text>');
-    document.getElementById("gl-bins").innerHTML = p.join("");
+    cap.forEach(function (line, i) {
+      p.push('<text x="' + W / 2 + '" y="' + (H - B + 31 + 15 * i) + '" text-anchor="middle">' + line + "</text>");
+    });
+    p.push('<text x="2" y="30">% burnt</text>');
+    svg.innerHTML = p.join("");
   }
 
   function drawEffects() {
@@ -231,17 +241,24 @@
       { l: "vs native broadleaf", e: 0.23, lo: -0.12, hi: 0.57, warn: true },
       { l: "northern block only", e: -0.14, lo: -0.38, hi: 0.11, warn: true },
     ];
-    var W = 420,
-      H = 200,
-      L = 10,
+    // CSS pixels, as in drawBins.
+    var svg = document.getElementById("gl-eff");
+    var cap = [];
+    var L = 10,
       R = 14,
-      T = 30;
+      T = 30,
+      Z = T + 24 + 2 * 44 + 16; // where the zero line stops, under the last row
+    var dims = ChartPx.fit(svg, function (w) {
+      cap = ChartPx.lines(["points of annual burn probability", "per +10 points eucalyptus"], 11, w - 4);
+      return Z + 37 + 15 * (cap.length - 1);
+    });
+    var W = dims.w;
     var lo = -0.6,
       hi = 0.7;
     var x = function (v) { return L + ((v - lo) / (hi - lo)) * (W - L - R); };
-    var p = ['<text class="ttl" x="0" y="12">WHAT SURVIVES THE CONTROLS</text>'];
-    p.push('<line class="zero" x1="' + x(0) + '" y1="' + T + '" x2="' + x(0) + '" y2="' + (H - 34) + '"></line>');
-    p.push('<text x="' + x(0) + '" y="' + (H - 20) + '" text-anchor="middle">0</text>');
+    var p = ['<text class="ttl" x="1" y="13">WHAT SURVIVES THE CONTROLS</text>'];
+    p.push('<line class="zero" x1="' + x(0) + '" y1="' + T + '" x2="' + x(0) + '" y2="' + Z + '"></line>');
+    p.push('<text x="' + x(0) + '" y="' + (Z + 14) + '" text-anchor="middle">0</text>');
     rows.forEach(function (r, i) {
       var y = T + 24 + i * 44;
       var cls = r.warn ? " warn" : "";
@@ -250,9 +267,10 @@
       p.push('<circle class="dot' + cls + '" cx="' + x(r.e) + '" cy="' + y + '" r="3.6"></circle>');
       p.push('<text x="' + (x(r.hi) + 6) + '" y="' + (y + 4) + '">' + r.e.toFixed(2) + "</text>");
     });
-    p.push('<text x="' + (W / 2) + '" y="' + (H - 4) +
-      '" text-anchor="middle">points of annual burn probability per +10 points eucalyptus</text>');
-    document.getElementById("gl-eff").innerHTML = p.join("");
+    cap.forEach(function (line, i) {
+      p.push('<text x="' + W / 2 + '" y="' + (Z + 31 + 15 * i) + '" text-anchor="middle">' + line + "</text>");
+    });
+    svg.innerHTML = p.join("");
   }
 
   var totE = 0,
@@ -283,6 +301,8 @@
   paint();
   drawBins();
   drawEffects();
+  ChartPx.watch(document.getElementById("gl-bins"), drawBins);
+  ChartPx.watch(document.getElementById("gl-eff"), drawEffects);
 
   var rt;
   window.addEventListener("resize", function () {

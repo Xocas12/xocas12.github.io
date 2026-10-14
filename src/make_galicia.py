@@ -26,17 +26,33 @@ were fitted by minimising the disagreement between the pixel at a cell centre an
 fit only fixes where inside a cell the samples fall. An origin a whole cell out still samples
 clean cell centres, one cell over, so the whole-cell part is pinned by the land-mask check below.
 
-It is only publishable because it is checked, and this script exits non-zero if either check
+It is only publishable because it is checked, and this script exits non-zero if any check
 fails:
 
-  - the recovered eucalyptus-2024 area must land within half a per cent of the hectares
-    `informe.md` states;
+  - the recovered eucalyptus-2024 and native-broadleaf-2017 areas must each land within half a
+    per cent of the hectares `informe.md` states for that year, once on the decoded floats and
+    again on the packed bytes, decoded the way the page decodes them (check_galicia.py, which
+    every build also runs);
   - every panel draws the same 29,565 cells, so every panel read must decode exactly the
     eucalyptus-2024 panel's land mask, to the cell. A panel origin a whole cell out fails this
     by hundreds of cells, and would otherwise pair its values with the neighbouring cells.
 
 If the figure is ever regenerated with a different layout, those checks are what fail rather
 than the page silently going stale.
+
+What the page sums
+------------------
+The layers ship at four bits a cell, but the page adds them up into the area tiles, so the
+packing has to keep the totals as well as the per-cell values. Linear coding (level q read as
+q/15) does not: every value under 1/30 becomes zero, which is half the cells, and the tiles came
+out 1.05 and 1.12 per cent under the report while the check on the floats passed at +0.16. Each
+layer therefore ships a 16-entry decode table whose entry q is the mean of the values that
+rounded to q. The page reads table[q], so its sums equal the checked decode to within the
+table's rounding, and the hover still moves in sixteen steps.
+
+The burnt-share bars are not summed on the page at all. They are computed here from the
+full-resolution decode and shipped as `bins`, with their edges; the page draws them and fills
+the lede's two figures from the first and last, so the lede and the bars cannot disagree.
 
 What is shipped, and what is not
 --------------------------------
@@ -70,6 +86,8 @@ import sys
 
 import numpy as np
 
+from check_galicia import AREA_TOL, LEDE, REPORT_HA, decoded_ha, lede_figures, lede_problems, payload_problems
+
 NX, NY = 230, 235          # GRID_1KM over BBOX (465000, 4620000, 695000, 4855000), EPSG:25829
 SCALE = 2.008              # output pixels per cell at the figure's 140 dpi
 #: Panel origins in output pixels: top and bottom rows, left, middle and right columns. The
@@ -86,9 +104,12 @@ PANELS = [
     ("burn", 1, 1, "SEQ_ORANGE"),  # Fraccion queimada 2018-2023 (EFFIS)
 ]
 
-#: informe.md, "Superficie de eucalipto (mapa)": 442 thousand ha in 2024.
-EXPECT_EUC_HA = 442_209
-AREA_TOL = 0.005
+# The report's hectares (informe.md, "superficie no mapa") and the tolerance live in
+# check_galicia.py, so this script and the build hold the payload to the same figures.
+
+#: Edges of the burnt-share bars, in eucalyptus fraction of the cell; the last is past 1 so that a
+#: cell that is all eucalyptus falls in a bin.
+BIN_EDGES = (0.0, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 1.01)
 
 
 def colormaps(repo: pathlib.Path) -> dict[str, np.ndarray]:
@@ -144,20 +165,35 @@ def rle(mask: np.ndarray) -> list[int]:
     return runs if not flat[0] else [0] + runs
 
 
-def nibbles(v: np.ndarray) -> str:
-    """4 bits a cell, two cells a byte, base64.
+def nibbles(v: np.ndarray) -> tuple[str, list[float]]:
+    """4 bits a cell, two cells a byte, base64; and the table that decodes each level.
 
-    Sixteen levels is coarse and that is the right coarseness: the quantity is a fraction of a
-    square kilometre recovered from a colour ramp in a PNG, so finer steps would encode the
-    figure's rendering rather than the model's output.
+    Sixteen levels is coarse and that is the right coarseness for one cell: the quantity is a
+    fraction of a square kilometre recovered from a colour ramp in a PNG, so finer steps would
+    encode the figure's rendering rather than the model's output. It is not coarse enough to sum
+    as q/15, though, because the page adds the cells up (see "What the page sums" above). So
+    level q decodes to the mean of the values that rounded to it, which keeps the total; a level
+    no cell uses decodes to q/15.
 
     The uint8 cast is load-bearing. Without it NumPy promotes the shift to int64 and every cell
-    costs eight bytes instead of half of one, which is a 320 KB payload instead of a 53 KB one.
+    costs eight bytes instead of half of one, which is a 320 KB payload instead of a 50 KB one.
     """
-    q = np.clip(np.rint(np.nan_to_num(v) * 15), 0, 15).astype(np.uint8)
+    v = np.nan_to_num(v)
+    q = np.clip(np.rint(v * 15), 0, 15).astype(np.uint8)
+    lut = [round(float(v[q == k].mean()) if (q == k).any() else k / 15, 5) for k in range(16)]
     if q.size % 2:
         q = np.append(q, np.uint8(0))
-    return base64.b64encode(((q[0::2] << np.uint8(4)) | q[1::2]).astype(np.uint8).tobytes()).decode("ascii")
+    packed = base64.b64encode(((q[0::2] << np.uint8(4)) | q[1::2]).astype(np.uint8).tobytes()).decode("ascii")
+    return packed, lut
+
+
+def burnt_bins(euc: np.ndarray, brn: np.ndarray) -> list[list]:
+    """[cells, mean burnt share] per eucalyptus bin, from the full-resolution decode."""
+    out = []
+    for lo, hi in zip(BIN_EDGES, BIN_EDGES[1:]):
+        m = (euc >= lo) & (euc < hi)
+        out.append([int(m.sum()), round(float(brn[m].mean()), 5) if m.any() else 0.0])
+    return out
 
 
 def delta(idx: np.ndarray) -> list[int]:
@@ -200,24 +236,31 @@ def build(repo: pathlib.Path) -> tuple[str, dict]:
         sys.exit("decoded land masks differ from the eucalyptus-2024 panel's (hundreds of cells "
                  "means a panel origin is a whole cell out): " + "; ".join(off))
 
-    euc, nat, brn = (grids[k][land] for k in ("euc", "nat", "burn"))
-    euc_ha = float(np.nansum(euc) * 100)
-    nz = np.flatnonzero(np.nan_to_num(brn) > 0)
+    euc, nat, brn = (np.nan_to_num(grids[k][land]) for k in ("euc", "nat", "burn"))
+    nz = np.flatnonzero(brn > 0)
+    euc_q, euc_lut = nibbles(euc)
+    nat_q, nat_lut = nibbles(nat)
 
     payload = {
         "ny": NY,
         "nx": NX,
         "n": n,
         "mask": rle(land),
-        "euc": nibbles(euc),
-        "nat": nibbles(nat),
+        "euc": euc_q,
+        "euc_lut": euc_lut,
+        "nat": nat_q,
+        "nat_lut": nat_lut,
         "burn": {
             "i": delta(nz),
             "v": np.clip(np.rint(brn[nz] * 15), 1, 15).astype(int).tolist(),
         },
+        "bin_edges": list(BIN_EDGES),
+        "bins": burnt_bins(euc, brn),
+        "report_ha": REPORT_HA,
     }
     text = json.dumps(payload, separators=(",", ":"), allow_nan=False)
-    return text, {"cells": n, "euc_ha": euc_ha, "burn_cells": len(nz)}
+    ha = {"euc": float(euc.sum() * 100), "nat": float(nat.sum() * 100)}
+    return text, {"cells": n, "ha": ha, "burn_cells": len(nz)}
 
 
 def main() -> int:
@@ -228,16 +271,32 @@ def main() -> int:
     args = ap.parse_args()
 
     text, got = build(args.repo)
-    err = abs(got["euc_ha"] / EXPECT_EUC_HA - 1)
+    d = json.loads(text)
     print(f"  cells          {got['cells']}")
-    print(f"  eucalyptus     {got['euc_ha']:,.0f} ha vs {EXPECT_EUC_HA:,} published ({err:+.2%})")
-    print(f"  burnt cells    {got['burn_cells']}")
-    if got["cells"] != 29_565:
+    failed = got["cells"] != 29_565
+    if failed:
         print(f"decode recovered {got['cells']} cells, expected 29,565", file=sys.stderr)
+    for layer, label in (("euc", "eucalyptus"), ("nat", "native")):
+        ref, floats, shipped = REPORT_HA[layer], got["ha"][layer], decoded_ha(d, layer)
+        print(f"  {label:<14} {floats:,.0f} ha decoded, {shipped:,.0f} ha as the page reads it, "
+              f"vs {ref:,} published ({floats / ref - 1:+.2%}, {shipped / ref - 1:+.2%})")
+        if abs(floats / ref - 1) > AREA_TOL:
+            print(f"{label}: recovered area is {floats / ref - 1:+.2%} off the published figure, "
+                  f"limit {AREA_TOL:.1%}", file=sys.stderr)
+            failed = True
+    print(f"  burnt cells    {got['burn_cells']}")
+    print("  bars           " + " / ".join(f"{100 * v:.2f}" for _, v in d["bins"]))
+    # The same check the build runs, on the bytes about to be written.
+    for p in payload_problems(d):
+        print(f"payload: {p}", file=sys.stderr)
+        failed = True
+    if failed:
         return 1
-    if err > AREA_TOL:
-        print(f"recovered area is {err:.2%} off the published figure, limit {AREA_TOL:.1%}", file=sys.stderr)
-        return 1
+    # The lede is text in demo_galicia.html, edited by hand after a regeneration, so a stale one
+    # is reported here and refused by the build, not by this script.
+    lede = lede_problems(d, LEDE.read_text(encoding="utf-8"))
+    print("  lede           {} per cent down to {}".format(*lede_figures(d)) +
+          ("" if not lede else " -- demo_galicia.html does not say so yet; the build refuses it until it does"))
 
     if args.check:
         same = args.out.exists() and args.out.read_text(encoding="utf-8") == text

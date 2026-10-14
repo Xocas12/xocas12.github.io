@@ -6,7 +6,9 @@ Source
 
 Branch matters: `main` is a 34-file subset that does NOT carry these CSVs. Two files are read,
 `data/curated/labels/us_1956_sac_complexes.csv` and `.../us_1956_sac_airfields.csv`, both
-transcriptions of SAC's Atomic Weapons Requirements Study for 1959 (SM 129-56, 15 June 1956).
+transcriptions of SAC's Atomic Weapons Requirements Study for 1959 (SM 129-56, 15 June 1956):
+the complex list is Part I of the study, the airfield list Part II, because the Archive released
+Part I's airfield list only as an 11-page excerpt.
 
     python src/make_sac.py --repo ../Nuclear-Probabilities
     python src/make_sac.py --repo ../Nuclear-Probabilities --check   # regenerate and compare
@@ -19,8 +21,8 @@ came from, its priority tier, its country, the PDF page, and the printed line ve
 Dropped: `weapons` and `yield_kt`, which are redacted in the released copy and empty here;
 `selected`, which is 1 on every row and so would invite the page to imply that unmarked places
 were examined and spared; `plan_id`, `planner`, `plan_year`, `provenance` and `source_doc`, which
-are constant per list; `source_url`, carried once per list instead of 2,343 times; and `notes`
-and `name_modern`, which the panel does not show.
+are constant per list; `source_url`, carried once per list instead of 2,343 times, as the scan
+PDF it resolves to in SCANS; and `notes` and `name_modern`, which the panel does not show.
 
 Four rows print no usable coordinate and are dropped, which is why the page says 2,339 of 2,343.
 They are already known upstream: `data/curated/sac1956/anomalies.csv` lists ARKHANGELSK/BAKARITSA
@@ -45,9 +47,9 @@ and the display name is derived from the quote rather than stored beside it, whi
 Every substitution is proved, not assumed: this script expands all 2,339 templates and asserts
 each reproduces its original quote byte for byte, and that the derived name reproduces the
 original, before it will write anything. A row that fails either test keeps its literal quote
-and gets its name listed in `nx`. That takes the payload from 174.5 KB to 116.9 KB with nothing
-lost. src/check_sac.py then checks the rendered coordinate against the expanded quote on every
-build.
+and gets its name listed in `nx`. That took the payload from 174.5 KB to 116.9 KB with nothing
+lost (117.0 KB since the scan links became the PDFs' own, longer URLs). src/check_sac.py then
+checks the rendered coordinate against the expanded quote on every build.
 """
 
 from __future__ import annotations
@@ -69,15 +71,33 @@ LISTS = [
     ("data/curated/labels/us_1956_sac_complexes.csv", 0),  # urban-industrial complex
     ("data/curated/labels/us_1956_sac_airfields.csv", 1),  # airfield
 ]
-SOURCE_URLS = [
-    "https://nsarchive.gwu.edu/document/15800-09-urban-industrial-target-list-part-i",
-    "https://nsarchive.gwu.edu/document/15800-08-air-power-target-list-part-i",
-]
+#: The scan each list's panel link opens, keyed by the `source_url` that list's CSV carries:
+#: (the PDF, its page count). The panel cites "PDF page N", counted in that file, and links to
+#: it at `#page=N`, so the link must be the PDF itself and not the Archive's page about it. The
+#: complex CSV names that page (doc. 09, whose download is the complete 306-page Part I list);
+#: the airfield CSV already names its PDF (doc. 06, the 43-page Part II list). Both PDFs were
+#: opened at a cited page: page 166 of the first prints "1 5150 MOSCOW 5545-03737", page 43 of
+#: the second "619 9792 ZALIV KRESTA 0075-8014 6559-17848W S".
+#:
+#: The links used to be written out here apart from the data, and the airfield one pointed at
+#: an Archive page that returns 404. Now each comes from its CSV through this table, which stays
+#: offline so the script fetches nothing, and a `source_url` not listed here stops the script:
+#: a link nobody has opened cannot reach the page.
+SCANS = {
+    "https://nsarchive.gwu.edu/document/15800-09-urban-industrial-target-list-part-i": (
+        "https://nsarchive.gwu.edu/sites/default/files/documents/4114599/09-Urban-Industrial-Target-List-for-Part-I-from.pdf",
+        306,
+    ),
+    "https://nsarchive2.gwu.edu/nukevault/ebb538-Cold-War-Nuclear-Target-List-Declassified-First-Ever/documents/section6.pdf": (
+        "https://nsarchive2.gwu.edu/nukevault/ebb538-Cold-War-Nuclear-Target-List-Declassified-First-Ever/documents/section6.pdf",
+        43,
+    ),
+}
 
 #: Checked against the source repository's own README and data card. A decode or parse bug that
 #: did not move these would have to be very strange.
 EXPECT = {
-    "rows_in": 2343,          # README: the two Part I lists, transcribed in full
+    "rows_in": 2343,          # README: the Part I complex list and the Part II airfield list, in full
     "rows_plotted": 2339,     # minus the four anomalies.csv rows with no usable coordinate
     "complex_top": "MOSCOW",  # priority 1 of the complex list
     "airfield_top": "BYKHOV",  # priority 1 of the airfield list
@@ -132,13 +152,29 @@ def display_name(quote: str) -> str:
 NAME_RE = re.compile(r"^(\S+)\s+(\d{4,5})\s+(.*?)\s+((?:\d{4}-\S+).*)$")
 
 
+def scan_for(rel: str, d: pd.DataFrame) -> tuple[str, int]:
+    """The scan PDF and its page count for one list, from the one `source_url` its rows carry."""
+    urls = sorted(set(d["source_url"].fillna("").str.strip()))
+    if len(urls) != 1:
+        sys.exit(f"{rel}: expected one source_url for the whole list, found {len(urls)}: {urls}")
+    if urls[0] not in SCANS:
+        sys.exit(
+            f"{rel}: source_url {urls[0]!r} is not in SCANS. Open it, find the PDF whose pages the "
+            "source_page column counts, and add the pair -- the panel links straight to that PDF."
+        )
+    return SCANS[urls[0]]
+
+
 def build(repo: pathlib.Path) -> tuple[str, dict]:
     rows, dropped = [], []
+    src = []
     for rel, kind in LISTS:
         path = repo / rel
         if not path.exists():
             sys.exit(f"{path} not found -- is this a clone of the claude/sleepy-davinci-d3sk0m branch?")
         d = pd.read_csv(path, dtype=str)
+        pdf, pages = scan_for(rel, d)
+        src.append(pdf)  # LISTS runs in `kind` order, and the panel reads src[k]
         lat = pd.to_numeric(d["lat"], errors="coerce")
         lon = pd.to_numeric(d["lon"], errors="coerce")
         for i, r in d.iterrows():
@@ -152,6 +188,9 @@ def build(repo: pathlib.Path) -> tuple[str, dict]:
             if lo < -150:
                 lo += 360
             page = re.search(r"p\.(\d+)", str(r["source_page"]))
+            pg = int(page.group(1)) if page else 0
+            if not 1 <= pg <= pages:
+                sys.exit(f"{rel}: {r['name_source']} cites PDF page {pg}, but {pdf} has {pages} pages")
             rows.append(
                 {
                     "la": int(round(float(lat[i]) * 60)),
@@ -161,7 +200,7 @@ def build(repo: pathlib.Path) -> tuple[str, dict]:
                     "n": str(r["name_source"]).strip().title()[:26],
                     "c": str(r["target_country"]).strip(),
                     "q": str(r["quote"]).strip(),
-                    "pg": int(page.group(1)) if page else 0,
+                    "pg": pg,
                 }
             )
 
@@ -190,7 +229,7 @@ def build(repo: pathlib.Path) -> tuple[str, dict]:
     ci = {c: i for i, c in enumerate(countries)}
     payload = {
         "countries": countries,
-        "src": SOURCE_URLS,
+        "src": src,
         "la": [r["la"] for r in rows],
         "lo": [r["lo"] for r in rows],
         "k": [r["k"] for r in rows],

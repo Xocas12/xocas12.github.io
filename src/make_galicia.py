@@ -26,20 +26,38 @@ were fitted by minimising the disagreement between the pixel at a cell centre an
 fit only fixes where inside a cell the samples fall. An origin a whole cell out still samples
 clean cell centres, one cell over, so the whole-cell part is pinned by the land-mask check below.
 
-It is only publishable because it is checked, and this script exits non-zero if either check
+It is only publishable because it is checked, and this script exits non-zero if any check
 fails:
 
-  - the recovered eucalyptus-2024 area must land within half a per cent of the hectares
-    `informe.md` states;
+  - the recovered eucalyptus areas, 2017 and 2024, must each land within half a per cent of the
+    hectares `informe.md` states;
   - every panel draws the same 29,565 cells, so every panel read must decode exactly the
-    eucalyptus-2024 panel's land mask, to the cell. A panel origin a whole cell out fails this
-    by hundreds of cells, and would otherwise pair its values with the neighbouring cells.
+    eucalyptus-2017 panel's land mask, to the cell. A panel origin a whole cell out fails this
+    by hundreds of cells, and would otherwise pair its values with the neighbouring cells;
+  - the comparison of the two eucalyptus maps against the fires must still give the figures the
+    page's note quotes (NOTE_BURNT_EUC, NOTE_UNBURNT_GAP_MAX, NOTE_RATIO), and the inventory
+    plots must still fall between the two maps.
 
 If the figure is ever regenerated with a different layout, those checks are what fail rather
 than the page silently going stale.
 
 What is shipped, and what is not
 --------------------------------
+The eucalyptus layer is the 2017 panel. The project's estimates use the 2017 map, which is made
+from imagery taken before the 2018-2023 fires, so that fire cannot feed back into the treatment
+(analysis.py's module docstring); informe.md runs the fire estimate on the 2024 map only as a
+sensitivity check, labelled "2024 (posterior aos lumes)". The 2024 map is made after the fires,
+and burned eucalyptus canopy is mapped as shrub afterwards (analysis.py's own comment on gross
+gain). Set against the fires, the 2024 map counts fire removing eucalyptus as eucalyptus not
+burning: in the cells that burned it finds about half the eucalyptus the 2017 map does, while
+in the other cells the two maps' averages differ by about a point (NOTE_BURNT_EUC,
+NOTE_UNBURNT_GAP_MAX). The 2017 map has its own weakness, and the page's note states it:
+backdating keeps the 2024 class only on pixels with no Hansen loss and no EFFIS burn, so on
+every burnt pixel the 2017 value is the same model run on 2017 imagery, which is weaker
+(eucalyptus precision against the MFE50 is 0.31 for that classification, 0.47 for 2024). The
+2024 panel is still decoded, to check its hectares and its land mask and to measure the
+comparison the note gives, but it is not shipped.
+
 The figure has six panels. Three are deliberately not shipped:
 
   - "Cambio 2017-2024" is an artefact of how the 2017 map was made. `informe.md` section 2 says
@@ -49,7 +67,8 @@ The figure has six panels. Three are deliberately not shipped:
     seven years", which is false and which the repository never claims.
   - "Celas prioritarias para restaurar" implies a benefit the repository declines to claim: its
     own projection band for restoring 25 per cent of eucalyptus crosses zero.
-  - Eucalyptus 2017, because without the change layer the 2024 layer says everything it says.
+  - Eucalyptus 2024, for the reason above. Shipping it as a second toggle beside 2017 would
+    bring the change view back by another route.
 
 The native-broadleaf and burnt layers used to be read from origins a whole cell out (COL_X[0]
 one cell right, ROW_Y[1] one cell low), so each burnt value was drawn one row north of the cell
@@ -74,21 +93,38 @@ NX, NY = 230, 235          # GRID_1KM over BBOX (465000, 4620000, 695000, 485500
 SCALE = 2.008              # output pixels per cell at the figure's 140 dpi
 #: Panel origins in output pixels: top and bottom rows, left, middle and right columns. The
 #: right-hand column (change, priority) has no shipped panel; its origin was checked by decoding
-#: the priority panel, whose land mask matches the eucalyptus-2024 mask cell for cell.
+#: the priority panel, whose land mask matches the eucalyptus mask cell for cell.
 ROW_Y = (114.4, 681.592)
 COL_X = (35.942, 627.5, 1218.926)
 BG_TOL, RESIDUAL_TOL = 9, 18
 
-#: Panels actually read: (name, column, row, colormap name in reporting.py)
+#: Panels actually read: (name, column, row, colormap name in reporting.py). The first three are
+#: shipped; euc24 is decoded only to be checked and compared, never written to the payload.
 PANELS = [
-    ("euc", 1, 0, "SEQ_GREEN"),    # Fraccion de eucalipto, 2024
+    ("euc", 0, 0, "SEQ_GREEN"),    # Fraccion de eucalipto, 2017
     ("nat", 0, 1, "SEQ_GREEN"),    # Fraccion de frondosas autoctonas, 2017
     ("burn", 1, 1, "SEQ_ORANGE"),  # Fraccion queimada 2018-2023 (EFFIS)
+    ("euc24", 1, 0, "SEQ_GREEN"),  # Fraccion de eucalipto, 2024
 ]
 
-#: informe.md, "Superficie de eucalipto (mapa)": 442 thousand ha in 2024.
-EXPECT_EUC_HA = 442_209
+#: informe.md, "Superficie de eucalipto (mapa)" and the section 2 area tables: 483 thousand ha
+#: of eucalyptus in 2017, 442 thousand in 2024.
+EXPECT_HA = {"euc": 482_702, "euc24": 442_209}
 AREA_TOL = 0.005
+
+#: demo_galicia.js's note quotes these, so the script fails if the decode stops giving them.
+#: Mean eucalyptus fraction, per cent to one decimal, of the cells that burned (any EFFIS burn in
+#: 2018-2023, the cells the page stamps as burnt), on each map:
+NOTE_BURNT_EUC = {"euc": 10.3, "euc24": 5.6}
+#: while in the cells that did not burn the two maps' averages differ "by about a point":
+NOTE_UNBURNT_GAP_MAX = 1.5
+#: and, to two decimals, the share burnt under eucalyptus over the share burnt under everything
+#: else, weighting each cell's burnt share by its eucalyptus and by the rest of the cell:
+NOTE_RATIO = {"euc": 0.60, "euc24": 0.17}
+#: informe.md section 7, "Comprobacion sobre o terreo, sen mapa": inventory plots burned 0.14 per
+#: cent a year where they listed eucalyptus and 0.38 where they did not. The note says this falls
+#: between the two maps' ratios.
+IFN3_BURN_PCT = (0.14, 0.38)
 
 
 def colormaps(repo: pathlib.Path) -> dict[str, np.ndarray]:
@@ -180,6 +216,28 @@ def mask_mismatches(grids: dict[str, np.ndarray], land: np.ndarray) -> list[str]
     return out
 
 
+def fire_comparison(eucs: dict[str, np.ndarray], brn: np.ndarray) -> dict[str, dict[str, float]]:
+    """For each eucalyptus map, what the note says about it against the 2018-2023 fires.
+
+    burnt_euc_pct / unburnt_euc_pct: mean eucalyptus fraction of the cells with any burn, and of
+    the rest, per cent.
+    ratio: share burnt under eucalyptus over share burnt under everything else, area-weighted,
+    the map's counterpart of the inventory plots' 0.14 / 0.38.
+    """
+    b = np.nan_to_num(brn)
+    burnt = b > 0
+    out = {}
+    for name, e in eucs.items():
+        under_euc = (e * b).sum() / e.sum()
+        under_rest = ((1 - e) * b).sum() / (1 - e).sum()
+        out[name] = {
+            "burnt_euc_pct": float(100 * e[burnt].mean()),
+            "unburnt_euc_pct": float(100 * e[~burnt].mean()),
+            "ratio": float(under_euc / under_rest),
+        }
+    return out
+
+
 def build(repo: pathlib.Path) -> tuple[str, dict]:
     try:
         from PIL import Image
@@ -197,11 +255,10 @@ def build(repo: pathlib.Path) -> tuple[str, dict]:
     n = int(land.sum())
     off = mask_mismatches(grids, land)
     if off:
-        sys.exit("decoded land masks differ from the eucalyptus-2024 panel's (hundreds of cells "
+        sys.exit("decoded land masks differ from the eucalyptus-2017 panel's (hundreds of cells "
                  "means a panel origin is a whole cell out): " + "; ".join(off))
 
-    euc, nat, brn = (grids[k][land] for k in ("euc", "nat", "burn"))
-    euc_ha = float(np.nansum(euc) * 100)
+    euc, nat, brn, euc24 = (grids[k][land] for k in ("euc", "nat", "burn", "euc24"))
     nz = np.flatnonzero(np.nan_to_num(brn) > 0)
 
     payload = {
@@ -217,7 +274,41 @@ def build(repo: pathlib.Path) -> tuple[str, dict]:
         },
     }
     text = json.dumps(payload, separators=(",", ":"), allow_nan=False)
-    return text, {"cells": n, "euc_ha": euc_ha, "burn_cells": len(nz)}
+    return text, {
+        "cells": n,
+        "ha": {"euc": float(np.nansum(euc) * 100), "euc24": float(np.nansum(euc24) * 100)},
+        "burn_cells": len(nz),
+        "fire": fire_comparison({"euc": euc, "euc24": euc24}, brn),
+    }
+
+
+def problems(got: dict) -> list[str]:
+    """Every way the decode disagrees with what the report publishes or the page's note says."""
+    out = []
+    if got["cells"] != 29_565:
+        out.append(f"decode recovered {got['cells']} cells, expected 29,565")
+    for k, expect in EXPECT_HA.items():
+        err = abs(got["ha"][k] / expect - 1)
+        if err > AREA_TOL:
+            out.append(f"{k}: recovered area is {err:.2%} off the published figure, limit {AREA_TOL:.1%}")
+    for k, quoted in NOTE_BURNT_EUC.items():
+        pct = round(got["fire"][k]["burnt_euc_pct"], 1)
+        if pct != quoted:
+            out.append(f"{k}: burnt cells average {pct}% eucalyptus, the page's note says {quoted}%")
+    gap = abs(got["fire"]["euc"]["unburnt_euc_pct"] - got["fire"]["euc24"]["unburnt_euc_pct"])
+    if gap > NOTE_UNBURNT_GAP_MAX:
+        out.append(f"unburnt cells: the two maps' averages differ by {gap:.1f} points, the page's "
+                   f"note says about a point (limit {NOTE_UNBURNT_GAP_MAX})")
+    for k, quoted in NOTE_RATIO.items():
+        ratio = round(got["fire"][k]["ratio"], 2)
+        if ratio != quoted:
+            out.append(f"{k}: burnt-share ratio is {ratio}, the page's note says {quoted}")
+    ifn3 = IFN3_BURN_PCT[0] / IFN3_BURN_PCT[1]
+    r17, r24 = got["fire"]["euc"]["ratio"], got["fire"]["euc24"]["ratio"]
+    if not r24 < ifn3 < r17:
+        out.append(f"inventory ratio {ifn3:.2f} is not between the 2024 map's {r24:.2f} and the "
+                   f"2017 map's {r17:.2f}, as the page's note says")
+    return out
 
 
 def main() -> int:
@@ -228,15 +319,20 @@ def main() -> int:
     args = ap.parse_args()
 
     text, got = build(args.repo)
-    err = abs(got["euc_ha"] / EXPECT_EUC_HA - 1)
     print(f"  cells          {got['cells']}")
-    print(f"  eucalyptus     {got['euc_ha']:,.0f} ha vs {EXPECT_EUC_HA:,} published ({err:+.2%})")
+    for k, label in (("euc", "eucalyptus 2017"), ("euc24", "eucalyptus 2024")):
+        err = got["ha"][k] / EXPECT_HA[k] - 1
+        print(f"  {label}  {got['ha'][k]:,.0f} ha vs {EXPECT_HA[k]:,} published ({err:+.2%})")
     print(f"  burnt cells    {got['burn_cells']}")
-    if got["cells"] != 29_565:
-        print(f"decode recovered {got['cells']} cells, expected 29,565", file=sys.stderr)
-        return 1
-    if err > AREA_TOL:
-        print(f"recovered area is {err:.2%} off the published figure, limit {AREA_TOL:.1%}", file=sys.stderr)
+    for k, label in (("euc", "2017 map"), ("euc24", "2024 map")):
+        f = got["fire"][k]
+        print(f"  {label}       burnt cells average {f['burnt_euc_pct']:.1f}% eucalyptus, the rest "
+              f"{f['unburnt_euc_pct']:.1f}%; burnt share under eucalyptus / elsewhere {f['ratio']:.2f}")
+    print(f"  inventory      {IFN3_BURN_PCT[0]} / {IFN3_BURN_PCT[1]} = {IFN3_BURN_PCT[0] / IFN3_BURN_PCT[1]:.2f}")
+    found = problems(got)
+    for p in found:
+        print(p, file=sys.stderr)
+    if found:
         return 1
 
     if args.check:

@@ -7,6 +7,7 @@
   .gp-chart .notch { stroke: var(--teal); stroke-width: 1; stroke-dasharray: 3 3; }
   .gp-chart .ax { stroke: var(--line); stroke-width: 1; }
   .gp-chart .stub { fill: var(--line); }
+  .gp-chart .brk { fill: var(--surface); }
   .gp-chart .lbl { fill: var(--ink); }
   .gp-seed circle { fill: color-mix(in oklab, var(--muted) 55%, var(--surface)); }
   .gp-seed circle.ok { fill: var(--accent); }
@@ -21,8 +22,11 @@
   <p class="lede">
     Twenty learning enterprises face a planner that pays a bonus for hitting the plan. Nothing in the reward
     tells them to report exactly 1.00, and under a sharp notch a fifth of every report they ever file lands in
-    one bin just above it. Widen the notch and the pile does not merely shrink — it walks off the target,
-    because a wide notch is a plateau and the mass spreads along it. These are 1.9 million reported
+    one bin just above it. Smooth the notch and reporting exactly 1.00 earns only half of it. The median
+    report moves from 1.007 under the sharp notch to 1.043 at width 0.02, where about nine-tenths of the
+    notch is already paid, and 1.077 at 0.05, then comes back to 1.066 at 0.1 and 0.981 at 0.25. By 0.25
+    the notch is a gentle ramp, and 54 per cent of reports sit below the plan, 36 per cent below 0.90.
+    These are 1.9 million reported
     fulfilment ratios from trained populations, with the overfulfilment cap held fixed so the notch is the only
     thing moving. The repository counts this as a pipeline check rather than a finding, and its pre-registered
     test for it failed.
@@ -37,7 +41,7 @@
   <svg class="gp-chart gp-seed" id="gp-seeds" viewBox="0 0 900 150" role="img" aria-label="Per-seed share of reports inside the bonus window, one dot per training run, against the 0.44 threshold."></svg>
   <div class="gp-stats">
     <div class="stat"><div class="k">Reports in the tallest bin</div><div class="v" id="gp-peak">0</div><div class="s" id="gp-peak-s"></div></div>
-    <div class="stat"><div class="k">Reports behind this panel</div><div class="v" id="gp-n">0</div><div class="s">from trained populations</div></div>
+    <div class="stat"><div class="k">Reports behind this panel</div><div class="v" id="gp-n">0</div><div class="s" id="gp-n-s">from trained populations</div></div>
     <div class="stat"><div class="k">Seeds clearing the bar</div><div class="v">23 of 30</div><div class="s">notched arm, share ≥ 0.44</div></div>
     <div class="stat"><div class="k">Pre-registered test</div><div class="v"><span class="pill fail">failed</span></div><div class="s">37% of seeds, 90% required</div></div>
   </div>

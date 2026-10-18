@@ -1,6 +1,6 @@
 # xocas12.github.io
 
-Personal site: five pages (home, CV, projects, writing, other) built from `src/` and published to
+Personal site: four pages (home, CV, projects, writing) built from `src/` and published to
 GitHub Pages at https://xocas12.github.io/.
 
 Every push to `main` runs `.github/workflows/pages.yml`, which builds the site and deploys it.
@@ -9,10 +9,10 @@ Every push to `main` runs `.github/workflows/pages.yml`, which builds the site a
 
 | Where | What |
 |---|---|
-| `src/pages/` | page content: `home.html`, `cv.html`, `projects.html`, `writing.html`, `other.html` |
-| `src/themes/` | `_common.css` (layout) and one file per style: `quiet`, `plain` |
-| `src/demo_*`, `gsib_demo.json`, `forensics.json` | the two demos on the Other page |
-| `src/activity.*`, `src/commits/` | the commit heatmap (`python src/make_activity.py` after updating the CSVs) |
+| `src/pages/` | page content: `home.html` (demos, then bio), `cv.html`, `projects.html`, `writing.html` |
+| `src/themes/` | `_common.css` (layout) and one file per style: `paper` (default), `quiet`, `plain` |
+| `src/demo_*`, `gsib_demo.json`, `forensics.json` | the five demos at the top of the home page |
+| `src/activity.*`, `src/commits/` | the commit heatmap at the bottom of Projects (`python src/make_activity.py` after updating the CSVs) |
 | `papers/` | the PDFs linked from the Writing page |
 
 The style is `DEFAULT_THEME` in `src/build.py`. Every style is also published under

@@ -1,10 +1,11 @@
-"""Build the site: five pages from src/pages/, styled by one theme from src/themes/.
+"""Build the site: four pages from src/pages/, styled by one theme from src/themes/.
 
     python src/build.py OUTDIR                  # the site, in the default theme
     python src/build.py OUTDIR --theme mono     # the site, in another theme
     python src/build.py OUTDIR --previews       # also OUTDIR/preview/<theme>/ for every theme
 
-The demos (src/demo_*.{html,js}) and the commit heatmap (src/activity.*) go on the Other page.
+The demos (src/demo_*.{html,js}) and the commit heatmap (src/activity.*) go on whichever page
+names their {{SLOT}}: the demos open the home page, the heatmap closes Projects.
 """
 import json
 
@@ -16,7 +17,7 @@ import sys
 
 SRC = pathlib.Path(__file__).resolve().parent
 REPO = SRC.parent
-THEMES = ["quiet", "plain"]
+THEMES = ["paper", "quiet", "plain"]
 
 #: (slot, html fragment, js file, (placeholder, payload)). A demo is wired by appearing here,
 #: which is what keeps the JSON check below covering all of them rather than being written out
@@ -57,20 +58,25 @@ def payload(name):
         if problems:
             sys.exit(f"{name}: " + "; ".join(problems[:5]))
     return text
-DEFAULT_THEME = "quiet"
+
+
+DEFAULT_THEME = "paper"
 
 PAGES = [  # file, nav label, <title>
     ("index", None, "Xocas Álvarez Jorge"),
     ("cv", "CV", "CV · Xocas Álvarez Jorge"),
     ("projects", "Projects", "Projects · Xocas Álvarez Jorge"),
     ("writing", "Writing", "Writing · Xocas Álvarez Jorge"),
-    ("other", "Other", "Other · Xocas Álvarez Jorge"),
 ]
+VIXIA = "https://web-production-8af6c.up.railway.app/"
+#: Pages that used to exist, kept as redirects so old links still land somewhere.
+MOVED = {"other": "index.html"}
 CONTACT = [
     ("mailto:xocas04@gmail.com", "Email"),
     ("https://github.com/Xocas12", "GitHub"),
     ("https://github.com/xocas123", "GitHub (older)"),
     ("https://www.linkedin.com/in/xocas-%C3%A1lvarez-21a250225/", "LinkedIn"),
+    (VIXIA, "Vixía"),
 ]
 # Where the site is served. Change this if the repo is renamed or a custom domain is added.
 SITE_URL = "https://xocas12.github.io/"
@@ -82,7 +88,6 @@ DESCRIPTIONS = {
     "cv": "CV of Xocas Álvarez: sole engineer at Samford Group, MS from Carnegie Mellon, BSc from Leiden.",
     "projects": "Projects by Xocas Álvarez: data platforms, election forensics, OSINT mapping and research code.",
     "writing": "Policy memos, essays and a thesis by Xocas Álvarez on AI governance, arms control and cyber policy.",
-    "other": "Five interactive demos on public data, and commit history, from Xocas Álvarez.",
 }
 PERSON = {
     "@context": "https://schema.org",
@@ -109,7 +114,7 @@ rd = lambda p: p.read_text(encoding="utf-8")
 
 def sections(html):
     """Wrap each <h2> and what follows it in <section><h2/><div class="sec-body"/></section>."""
-    parts = re.split(r"(<h2>.*?</h2>)", html)
+    parts = re.split(r"(<h2[^>]*>.*?</h2>)", html)
     out = [parts[0]]
     for i in range(1, len(parts), 2):
         out.append(f'<section>{parts[i]}<div class="sec-body">{parts[i + 1]}</div></section>')
@@ -118,13 +123,10 @@ def sections(html):
 
 def page(name, title, theme, root, preview):
     body = rd(SRC / "pages" / ("home.html" if name == "index" else name + ".html"))
-    scripts = ""
-    if name == "other":
-        for slot, html, _, _ in DEMOS:
+    js = []
+    for slot, html, src_js, (placeholder, data) in DEMOS:
+        if "{{" + slot + "}}" in body:
             body = body.replace("{{" + slot + "}}", rd(SRC / html))
-        body = body.replace("{{ACTIVITY}}", rd(SRC / "activity.html"))
-        js = []
-        for _, _, src_js, (placeholder, data) in DEMOS:
             text = rd(SRC / src_js)
             # Exactly once. str.replace() substitutes every occurrence, so a placeholder named
             # in a doc comment as well as in the code inlines the whole payload twice -- which
@@ -133,22 +135,26 @@ def page(name, title, theme, root, preview):
             if seen != 1:
                 sys.exit(f"{src_js}: {placeholder} appears {seen} times, expected exactly 1")
             js.append(text.replace(placeholder, payload(data)))
+    if "{{ACTIVITY}}" in body:
+        body = body.replace("{{ACTIVITY}}", rd(SRC / "activity.html"))
         js.append(rd(SRC / "activity.js").replace("__ACTIVITY_DATA__", payload("activity.json")))
-        stranded = sorted(set(re.findall(r"__[A-Z0-9_]+_DATA__", "".join(js))))
-        if stranded:
-            sys.exit(f"placeholders with no payload: {stranded}")
-        scripts = "".join(f"<script>\n{s}\n</script>\n" for s in js)
-    body = sections(body.replace("{{ROOT}}", root))
+    stranded = sorted(set(re.findall(r"__[A-Z0-9_]+_DATA__", "".join(js))))
+    if stranded:
+        sys.exit(f"placeholders with no payload: {stranded}")
+    scripts = "".join(f"<script>\n{s}\n</script>\n" for s in js)
+    body = sections(body.replace("{{ROOT}}", root).replace("{{VIXIA}}", VIXIA))
     left = re.findall(r"\{\{[A-Z_]+\}\}", body)
     if left:
         sys.exit(f"{name}: unfilled slots {sorted(set(left))}")
 
     nav = "".join(
         f'<a href="{f}.html"{CUR if f == name else ""}>{label}</a>'
-        for f, label, _ in PAGES if label)
-    header = "" if name == "index" else (
-        f'<header class="site"><a class="name" href="index.html">Xocas Álvarez</a><nav>{nav}</nav></header>\n'
-        f'<h1 class="page-title">{title.split(" · ")[0]}</h1>\n')
+        for f, label, _ in PAGES if label) + f'<a href="{VIXIA}">Vixía</a>'
+    # On the home page the name is the h1; elsewhere it is a link home and the page has its own h1.
+    me = '<h1 class="name">Xocas Álvarez</h1>' if name == "index" else '<a class="name" href="index.html">Xocas Álvarez</a>'
+    header = f'<header class="site">{me}<nav>{nav}</nav></header>\n'
+    if name != "index":
+        header += f'<h1 class="page-title">{title.split(" · ")[0]}</h1>\n'
     footer = "".join(f'<a href="{href}">{label}</a>' for href, label in CONTACT)
     bar = ""
     if preview:
@@ -183,10 +189,21 @@ def page(name, title, theme, root, preview):
             f'<footer>{footer}</footer>\n</div>\n{scripts}</body>\n</html>\n')
 
 
+def redirect(target):
+    """A stub for a page that moved. The script keeps the #anchor; the meta refresh is the fallback."""
+    return ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="robots" content="noindex">\n'
+            f'<link rel="canonical" href="{SITE_URL}{"" if target == "index.html" else target}">\n'
+            f'<meta http-equiv="refresh" content="0; url={target}">\n'
+            f'<script>location.replace("{target}" + location.hash)</script>\n</head>\n'
+            f'<body><a href="{target}">Moved here.</a></body>\n</html>\n')
+
+
 def build(out, theme, root="", preview=False):
     out.mkdir(parents=True, exist_ok=True)
     for name, _, title in PAGES:
         (out / f"{name}.html").write_text(page(name, title, theme, root, preview), encoding="utf-8", newline="\n")
+    for old, target in MOVED.items():
+        (out / f"{old}.html").write_text(redirect(target), encoding="utf-8", newline="\n")
 
 
 def main():

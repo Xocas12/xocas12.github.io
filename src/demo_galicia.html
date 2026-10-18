@@ -9,7 +9,7 @@
   .gl-read b { color: var(--ink); font-weight: 600; }
   .gl-chart { width: 100%; height: auto; display: block; }
   .gl-chart text { font-family: var(--mono); font-size: 10.5px; fill: var(--faint); }
-  .gl-chart .ttl { font-size: 11.5px; fill: var(--ink); letter-spacing: .06em; }
+  .gl-chart .ttl { font-size: 11.5px; fill: var(--ink); }
   .gl-chart .bar { fill: color-mix(in oklab, var(--accent) 70%, var(--surface)); }
   .gl-chart .zero { stroke: var(--line); stroke-width: 1; }
   .gl-chart .ci { stroke: var(--teal); stroke-width: 2.5; stroke-linecap: round; }
@@ -23,14 +23,12 @@
 </style>
 
 <div class="demo" id="galicia">
-  <h3>Where it grows is not where it burns</h3>
+  <h3>Eucalyptus and wildfire in Galicia</h3>
   <p class="lede">
-    Galicia at one square kilometre, 29,565 cells. Eucalyptus is a dense band hugging the Atlantic coast and
-    the north; the fires of 2018–2023 fall in the drier interior, and the two barely overlap. Bin the cells by
-    eucalyptus fraction and the burnt share falls almost monotonically, 4.5 per cent down to 0.3. That is not
-    an effect — plantations sit on the wet, mild coast, which differs from the interior in a dozen ways besides
-    eucalyptus. The right-hand panel is what the project gets once terrain, location, human pressure, weather
-    and the other covers are held fixed, and the comparison you choose decides the sign.
+    Galicia on a one-kilometre grid. Eucalyptus plantations sit on the wet Atlantic coast and the 2018–2023
+    fires were mostly inland, so in raw numbers more eucalyptus means less fire: 4.5% of cells burnt at the
+    low end, 0.3% at the high end. That's geography. The right-hand panel controls for terrain, location,
+    people, weather and other land cover, and there the sign depends on what eucalyptus is compared against.
   </p>
   <div class="controls">
     <div class="ctl">

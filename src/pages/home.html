@@ -1,19 +1,39 @@
-<p class="lead">Data and ML engineer in Barcelona. I build tools for looking at elections, finance, conflict and public records. Below are five of them, running in your browser on public data. More about me <a href="#about">at the bottom</a>.</p>
+<p class="lead">I'm a data and ML engineer in Barcelona. I build tools for studying elections, finance, conflict and public records, and I run <a href="{{VIXIA}}">Vixía</a>, an OSINT map of the war in Ukraine.</p>
 
-<h2>Bank contagion</h2>
+<div class="reel" id="reel" aria-label="Five demos, running on public data">
+  <div class="reel-bar">
+    <div class="reel-tabs" role="tablist" aria-label="Demos">
+      <button type="button" role="tab" id="reel-tab-0" aria-controls="reel-slide-0">Banks</button>
+      <button type="button" role="tab" id="reel-tab-1" aria-controls="reel-slide-1">Elections</button>
+      <button type="button" role="tab" id="reel-tab-2" aria-controls="reel-slide-2">Nuclear targets</button>
+      <button type="button" role="tab" id="reel-tab-3" aria-controls="reel-slide-3">Galicia</button>
+      <button type="button" role="tab" id="reel-tab-4" aria-controls="reel-slide-4">Planning</button>
+    </div>
+    <div class="reel-ctl">
+      <button type="button" id="reel-prev" aria-label="Previous demo">←</button>
+      <button type="button" id="reel-play">Pause</button>
+      <button type="button" id="reel-next" aria-label="Next demo">→</button>
+    </div>
+  </div>
+  <div class="reel-progress" aria-hidden="true"><i></i></div>
+  <div class="reel-view">
+    <div class="reel-slide" id="reel-slide-0" role="tabpanel" aria-labelledby="reel-tab-0">
 {{CONTAGION}}
-
-<h2>Election forensics</h2>
+    </div>
+    <div class="reel-slide" id="reel-slide-1" role="tabpanel" aria-labelledby="reel-tab-1">
 {{FORENSICS}}
-
-<h2>Nuclear targets, 1956</h2>
+    </div>
+    <div class="reel-slide" id="reel-slide-2" role="tabpanel" aria-labelledby="reel-tab-2">
 {{SAC}}
-
-<h2>Eucalyptus and fire</h2>
+    </div>
+    <div class="reel-slide" id="reel-slide-3" role="tabpanel" aria-labelledby="reel-tab-3">
 {{GALICIA}}
-
-<h2>Soviet planning</h2>
+    </div>
+    <div class="reel-slide" id="reel-slide-4" role="tabpanel" aria-labelledby="reel-tab-4">
 {{GOSPLAN}}
+    </div>
+  </div>
+</div>
 
 <h2 id="about">About</h2>
 <p>I work on computational approaches to social, economic and political questions, mostly to understand what makes governance work. In practice that means data engineering and statistics.</p>

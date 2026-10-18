@@ -56,8 +56,8 @@
     var xAt = function (i) { return L + i * bw; };
     var rho = function (i) { return D.lo + (c.i0 + i + 0.5) * D.w; };
 
-    var p = ['<text class="ttl" x="0" y="13">REPORTED FULFILMENT RATIO, NOTCH WIDTH ' +
-      (c.w === 0 ? "0 (SHARP)" : c.w) + "</text>"];
+    var p = ['<text class="ttl" x="0" y="13">Reported fulfilment ratio, bonus window width ' +
+      (c.w === 0 ? "0 (sharp)" : c.w) + "</text>"];
     for (var i = 0; i < n; i++) {
       if (!c.c[i]) continue;
       p.push('<rect class="bar' + (i === pk ? " pk" : "") + '" x="' + xAt(i).toFixed(1) +
@@ -113,14 +113,14 @@
       R = 30,
       T = 26;
     var x = function (v) { return L + v * (W - L - R); };
-    var p = ['<text class="ttl" x="0" y="13">EVERY RUN, NOT THE AVERAGE OF THEM</text>'];
+    var p = ['<text class="ttl" x="0" y="13">Each training run: share of reports in the bonus window</text>'];
     ["notched", "smooth"].forEach(function (arm, r) {
       var y = T + 26 + r * 44;
-      p.push('<text x="0" y="' + (y + 4) + '">' + arm + "</text>");
+      p.push('<text x="0" y="' + (y + 4) + '">' + (arm === "notched" ? "sharp bonus" : "smooth bonus") + "</text>");
       p.push('<line class="ax" x1="' + L + '" y1="' + y + '" x2="' + (W - R) + '" y2="' + y + '"></line>');
       D.seeds[arm].forEach(function (s) {
         p.push('<circle class="' + (s.share >= D.thresh ? "ok" : "") + '" cx="' + x(s.share).toFixed(1) +
-          '" cy="' + y + '" r="4" opacity="0.8"><title>seed ' + s.s + ": share " +
+          '" cy="' + y + '" r="4" opacity="0.8"><title>run ' + s.s + ": share " +
           s.share.toFixed(3) + ", " + esc(s.v) + "</title></circle>");
       });
     });
@@ -137,20 +137,12 @@
   }
 
   document.getElementById("gp-note").textContent =
-    "A simulation, not history. Twenty learning enterprises face a fixed rule-based planner; the " +
-    "bars are fulfilment ratios they reported at the end of training, from runs totalling about " +
-    "24 hours of compute. Nothing interesting follows from the pile on its own — reporting just " +
-    "over the notch is the plain optimum of the bonus they were handed — and the repository is " +
-    "explicit that bunching is a pipeline check and not part of its claims: if it failed to " +
-    "appear, the optimiser would be broken. Its pre-registered test for it FAILED: 90 per cent of " +
-    "seeds were required to show the effect, the notched arm reaches 37 per cent strictly, or 77 " +
-    "per cent if seeds whose confidence interval is undefined are counted as met. Seven of the 30 " +
-    "notched runs flatly contradict the pooled picture, two of them with no reports in the window " +
-    "at all, which is why every run is plotted rather than their average. The panels hold the " +
-    "overfulfilment cap fixed at 1.2 so the notch width is the only thing changing; the " +
-    "repository's own headline pair moves both at once. And the training budget is itself a " +
-    "finding: tripling it collapses the same economy to near-zero output, so each bar is a point " +
-    "on a learning trajectory rather than a steady state.";
+    "Bunching is simply the best response to the bonus, so the project treats it as a sanity check " +
+    "rather than a finding. Even so, its pre-registered test failed: it required 90% of training runs " +
+    "to bunch and got 37% (77% if runs with undefined intervals count). Seven of the 30 runs go the " +
+    "other way, which is why the lower panel shows every run. The overfulfilment cap stays at 1.2 " +
+    "throughout. Tripling the training budget collapses output to near zero, so these are snapshots " +
+    "of learning, not a steady state.";
 
   drawHist();
   drawSeeds();

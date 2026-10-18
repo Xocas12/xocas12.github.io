@@ -111,9 +111,9 @@
   }
 
   const NOTES = {
-    "2018": "Real data: 93,601 precincts with at least 100 registered voters (4,098 smaller ones excluded), turnout as ballots in boxes over registered voters. Source: Kobak's precinct files, the same inputs as Kobak, Shpilkin & Pshenichnikov (2016). Observed, expected and z come straight from the forensic-elections results table (200 Monte Carlo draws, seed 20260926). Not shown: 1,366 precincts reported exactly 100%.",
-    "2011": "Real data: 91,082 precincts with at least 100 registered voters (4,143 smaller ones excluded). The 2011 turnout signal is weaker than 2018's; the winner's vote share carries it (z = 8.4 in the results table). Not shown: 2,337 precincts reported exactly 100%.",
-    "sim": "Simulated: 20,000 honest precincts from psephos's test generator (lognormal sizes of 300 to 3,000 voters, turnout around 55%). The share you set reports the next multiple of 5 above its real turnout. Expected counts come from 40 binomial redraws per precinct (normal approximation), so z moves a little with the draw."
+    "2018": "93,601 precincts with at least 100 registered voters; turnout is ballots cast over registered voters. Data from Kobak's precinct files (Kobak, Shpilkin & Pshenichnikov, 2016). Expected counts and z come from 200 Monte Carlo draws. Not shown: 1,366 precincts that reported exactly 100%.",
+    "2011": "91,082 precincts with at least 100 registered voters. The turnout signal is weaker than in 2018; in 2011 it shows up in the winner's vote share instead (z = 8.4). Not shown: 2,337 precincts that reported exactly 100%.",
+    "sim": "20,000 honest simulated precincts, 300 to 3,000 voters each, turnout around 55%. The share you set rounds its turnout up to the next multiple of 5. Expected counts come from 40 random redraws per precinct, so z wobbles a little."
   };
   let simCache = {};
   function show(mode) {

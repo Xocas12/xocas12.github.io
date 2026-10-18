@@ -170,7 +170,7 @@
     let others = 0, othersE = 0;
     for (let i = 0; i < n; i++) if (i !== seed) { others += h[i] * E[i]; othersE += E[i]; }
     centerNum.textContent = eur(others);
-    centerCap.textContent = "LOST BY OTHER BANKS";
+    centerCap.textContent = "lost by other banks";
   }
   function bars(ul, items) {
     ul.innerHTML = "";

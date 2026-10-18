@@ -252,17 +252,11 @@
   });
 
   document.getElementById("sac-note").textContent =
-    "SAC's Atomic Weapons Requirements Study for 1959 (SM 129-56, 15 June 1956), declassified in 2015 " +
-    "and held by the National Security Archive. It is a requirements study, not an approved war plan: " +
-    "the first SIOP was four years away. The scans carry no text layer, so every line was read twice, " +
-    "independently, and disagreements were settled on an enlarged image; a blind audit of a 5 per cent " +
-    "sample, 743 lines, found no transcription errors. Of the 2,343 transcribed entries 2,339 are drawn " +
-    "here — four print no usable coordinate — and two complexes are missing from the published scan " +
-    "altogether, which the audit does not cover because it measures accuracy on lines that exist. The " +
-    "weapons and yield columns are redacted in the released copy, so nothing here says what any of it " +
-    "would have taken or done. Nothing is modelled: the repository fits models to these labels but says " +
-    "of its own runs that their numbers are not results, so this shows what SAC listed and not what made " +
-    "a place a target.";
+    "Source: SAC's Atomic Weapons Requirements Study for 1959 (SM 129-56, June 1956), declassified in " +
+    "2015, National Security Archive. It's a requirements study, not an approved war plan. Every line " +
+    "was transcribed twice independently, and a blind audit of 743 lines found no errors. Four " +
+    "entries give no usable coordinates and two are missing from the released scan. Weapons and " +
+    "yields are redacted, and nothing here is modelled.";
 
   showEntry(0);
   draw();

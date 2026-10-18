@@ -138,6 +138,8 @@ def page(name, title, theme, root, preview):
     if "{{ACTIVITY}}" in body:
         body = body.replace("{{ACTIVITY}}", rd(SRC / "activity.html"))
         js.append(rd(SRC / "activity.js").replace("__ACTIVITY_DATA__", payload("activity.json")))
+    if 'class="reel"' in body:  # after the demos, so it measures them once they have drawn
+        js.append(rd(SRC / "reel.js"))
     stranded = sorted(set(re.findall(r"__[A-Z0-9_]+_DATA__", "".join(js))))
     if stranded:
         sys.exit(f"placeholders with no payload: {stranded}")

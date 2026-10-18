@@ -206,7 +206,7 @@
       B = 34;
     var max = Math.max.apply(null, bins.map(function (x) { return x.v; })) * 1.12;
     var bw = (W - L - R) / bins.length;
-    var p = ['<text class="ttl" x="0" y="12">WHAT THE MAP SHOWS</text>'];
+    var p = ['<text class="ttl" x="0" y="12">Raw: share of cells burnt, by eucalyptus cover</text>'];
     bins.forEach(function (x, i) {
       var h = ((H - T - B) * x.v) / max;
       p.push('<rect class="bar" x="' + (L + i * bw + 3) + '" y="' + (H - B - h) +
@@ -239,7 +239,7 @@
     var lo = -0.6,
       hi = 0.7;
     var x = function (v) { return L + ((v - lo) / (hi - lo)) * (W - L - R); };
-    var p = ['<text class="ttl" x="0" y="12">WHAT SURVIVES THE CONTROLS</text>'];
+    var p = ['<text class="ttl" x="0" y="12">After controls: effect on burn probability</text>'];
     p.push('<line class="zero" x1="' + x(0) + '" y1="' + T + '" x2="' + x(0) + '" y2="' + (H - 34) + '"></line>');
     p.push('<text x="' + x(0) + '" y="' + (H - 20) + '" text-anchor="middle">0</text>');
     rows.forEach(function (r, i) {
@@ -265,20 +265,13 @@
   document.getElementById("gl-nat-ha").textContent = Math.round((totN * 100) / 1000);
 
   document.getElementById("gl-note").textContent =
-    "Model output, not a survey. The species map is trained on cleaned OpenStreetMap labels, " +
-    "eucalyptus pseudo-labels from clear-cut history and the 1998 Mapa Forestal de España; held " +
-    "out from the northern block it scores F1 0.77 for 2024, but against 6,903 national-inventory " +
-    "plots the plot-by-plot agreement is F1 0.45, and the totals match better than the cells do " +
-    "(the map calls 30.4 per cent of wooded plots eucalyptus, the plots list 27.5 per cent). The " +
-    "grid itself was read back off the figure the repository publishes, because the repository " +
-    "commits the figure and not the table; the recovered area comes within 0.2 per cent of the " +
-    "hectares the report states. The binned bars are a correlation I computed from that grid, not " +
-    "a result the project published. The intervals are the project's own, and the one that matters " +
-    "for restoration — eucalyptus against native broadleaf rather than against farmland — crosses " +
-    "zero. Its robustness value is 0.017: an unmeasured confounder explaining 1.7 per cent of the " +
-    "residual variance of both cover and burning would erase the first estimate. EFFIS records only " +
-    "the larger fires, there are six years of them, and 2022 dominates. The water effect is absent " +
-    "because the project could not measure it.";
+    "Model output, not a survey. Checked plot by plot against 6,903 national-inventory plots the " +
+    "species map scores F1 0.45, though its total is close (30.4% of wooded plots called eucalyptus, " +
+    "against 27.5% in the inventory). I rebuilt the grid from the project's published figure and " +
+    "computed the binned bars myself; the intervals are the project's. The comparison that matters " +
+    "for restoration, eucalyptus against native broadleaf, crosses zero, and a confounder explaining " +
+    "1.7% of the remaining variance would erase the fire estimate. Fires are from EFFIS: large fires " +
+    "only, six years, mostly 2022.";
 
   paint();
   drawBins();

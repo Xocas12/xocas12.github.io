@@ -53,3 +53,21 @@ footer a { color: var(--muted); }
 .preview-bar a { color: #9cf; }
 .preview-bar a[aria-current] { color: #fff; font-weight: 700; text-decoration: none; }
 
+
+/* the demo reel on the home page */
+.reel { margin-top: 36px; border: 1px solid var(--line); background: var(--surface); }
+.reel-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: stretch; border-bottom: 1px solid var(--line); }
+.reel-tabs { display: flex; flex-wrap: wrap; }
+.reel-bar button { font: inherit; font-size: 15px; color: var(--muted); background: none; border: 0; padding: 10px 14px; cursor: pointer; }
+.reel-bar button:hover { color: var(--ink); }
+.reel-tabs button[aria-selected="true"] { color: var(--ink); box-shadow: inset 0 -2px 0 var(--ink); }
+.reel-ctl { display: flex; }
+.reel-ctl #reel-play { min-width: 4.5em; }
+.reel-progress { height: 2px; background: transparent; }
+.reel-progress i { display: block; height: 100%; background: var(--accent); transform-origin: left; transform: scaleX(0); }
+.reel:not(.is-playing) .reel-progress i { opacity: 0; }
+.reel-view { position: relative; display: flex; align-items: flex-start; overflow: hidden; transition: height .45s ease; }
+.reel-slide { flex: 0 0 100%; min-width: 0; padding: 26px 26px 22px; }
+@media (max-width: 560px) { .reel-slide { padding: 18px 14px; } .reel-bar button { padding: 9px 10px; } }
+@media (prefers-reduced-motion: reduce) { .reel-view { transition: none; } }
+.reel .demo { background: none !important; border: 0 !important; border-radius: 0 !important; padding: 0 !important; }
